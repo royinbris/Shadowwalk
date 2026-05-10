@@ -7,7 +7,7 @@ import { VitePWA } from 'vite-plugin-pwa';
 export default defineConfig(({mode}) => {
   const env = loadEnv(mode, '.', '');
   return {
-    base: '/Shadowwalk/',
+    base: './',
     plugins: [
       react(), 
       tailwindcss(),
@@ -52,22 +52,26 @@ export default defineConfig(({mode}) => {
           ]
         },
         manifest: {
-          name: 'Shadowing App',
-          short_name: 'Shadowing',
-          description: 'AI-powered Shadowing Study App',
-          theme_color: '#000000',
-          background_color: '#000000',
+          name: 'ShadowWalk',
+          short_name: 'ShadowWalk',
+          description: 'Walking-friendly YouTube shadowing app',
+          theme_color: '#eab308',
+          background_color: '#09090b',
           display: 'standalone',
+          start_url: './',
+          id: './',
           icons: [
             {
-              src: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23000"/><text x="50" y="50" font-family="sans-serif" font-size="50" fill="%23fff" text-anchor="middle" dy=".3em">S</text></svg>',
+              src: './icon.png',
               sizes: '192x192',
-              type: 'image/svg+xml'
+              type: 'image/png',
+              purpose: 'any maskable'
             },
             {
-              src: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23000"/><text x="50" y="50" font-family="sans-serif" font-size="50" fill="%23fff" text-anchor="middle" dy=".3em">S</text></svg>',
+              src: './icon.png',
               sizes: '512x512',
-              type: 'image/svg+xml'
+              type: 'image/png',
+              purpose: 'any maskable'
             }
           ]
         }
