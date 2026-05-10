@@ -1,14 +1,16 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Sparkles, Eye, EyeOff } from 'lucide-react';
+import { Sparkles, Eye, EyeOff, X, Plus } from 'lucide-react';
 
 interface ApiKeyModalProps {
   isOpen: boolean;
   onClose: () => void;
   aiProvider: 'gemini' | 'cerebras' | 'openrouter';
   setAiProvider: (provider: 'gemini' | 'cerebras' | 'openrouter') => void;
-  userApiKey: string;
-  setUserApiKey: (key: string) => void;
+  geminiApiKeys: string[];
+  setGeminiApiKeys: (keys: string[]) => void;
+  selectedGeminiKeyIndex: number;
+  setSelectedGeminiKeyIndex: (index: number) => void;
   geminiModel: string;
   setGeminiModel: (model: string) => void;
   cerebrasApiKey: string;
@@ -30,8 +32,10 @@ export const ApiKeyModal = ({
   onClose,
   aiProvider,
   setAiProvider,
-  userApiKey,
-  setUserApiKey,
+  geminiApiKeys,
+  setGeminiApiKeys,
+  selectedGeminiKeyIndex,
+  setSelectedGeminiKeyIndex,
   geminiModel,
   setGeminiModel,
   cerebrasApiKey,
@@ -107,26 +111,75 @@ export const ApiKeyModal = ({
               </div>
 
               {aiProvider === 'gemini' ? (
-                <>
-                  <div className="relative">
-                    <input 
-                      type={isApiKeyVisible ? "text" : "password"}
-                      value={userApiKey}
-                      onChange={(e) => {
-                        const val = e.target.value;
-                        setUserApiKey(val);
-                        localStorage.setItem('user_gemini_api_key', val);
-                      }}
-                      placeholder="Gemini API 키를 입력하세요..."
-                      className={`w-full bg-black/40 border rounded-2xl px-5 py-4 text-base text-zinc-200 outline-none transition-all font-mono placeholder:text-zinc-700 ${!userApiKey ? 'border-red-500/50 focus:border-red-500' : 'border-zinc-800 focus:border-[#00e5ff]'}`}
-                    />
-                    <button 
-                      onClick={() => setIsApiKeyVisible(!isApiKeyVisible)}
-                      className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-600 hover:text-zinc-400 transition-colors"
-                    >
-                      {isApiKeyVisible ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                    </button>
+                <div className="space-y-3">
+                  <div className="max-h-56 overflow-y-auto space-y-3 pr-1 pb-1">
+                    {geminiApiKeys.map((key, idx) => (
+                      <div key={idx} className={`relative p-3 rounded-2xl border transition-all ${selectedGeminiKeyIndex === idx ? 'border-[#00e5ff] bg-[#00e5ff]/5' : 'border-zinc-800 bg-black/40'}`}>
+                        <div className="flex gap-2 mb-2 items-center">
+                          <input 
+                            type="radio" 
+                            checked={selectedGeminiKeyIndex === idx} 
+                            onChange={() => {
+                              setSelectedGeminiKeyIndex(idx);
+                              localStorage.setItem('selected_gemini_key_index', idx.toString());
+                            }} 
+                            className="accent-[#00e5ff]"
+                          />
+                          <span className="text-xs text-zinc-300 font-bold">API Key {idx + 1}</span>
+                          {geminiApiKeys.length > 1 && (
+                            <button 
+                              onClick={() => {
+                                const newKeys = geminiApiKeys.filter((_, i) => i !== idx);
+                                setGeminiApiKeys(newKeys);
+                                localStorage.setItem('user_gemini_api_keys', JSON.stringify(newKeys));
+                                if (selectedGeminiKeyIndex >= newKeys.length) {
+                                  setSelectedGeminiKeyIndex(0);
+                                  localStorage.setItem('selected_gemini_key_index', '0');
+                                } else if (selectedGeminiKeyIndex > idx) {
+                                  setSelectedGeminiKeyIndex(selectedGeminiKeyIndex - 1);
+                                  localStorage.setItem('selected_gemini_key_index', (selectedGeminiKeyIndex - 1).toString());
+                                }
+                              }}
+                              className="ml-auto text-zinc-600 hover:text-red-400"
+                            >
+                              <X className="w-4 h-4" />
+                            </button>
+                          )}
+                        </div>
+                        <div className="relative">
+                          <input 
+                            type={isApiKeyVisible ? "text" : "password"}
+                            value={key}
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              const newKeys = [...geminiApiKeys];
+                              newKeys[idx] = val;
+                              setGeminiApiKeys(newKeys);
+                              localStorage.setItem('user_gemini_api_keys', JSON.stringify(newKeys));
+                            }}
+                            placeholder="Gemini API 키..."
+                            className={`w-full bg-black/40 border rounded-xl px-4 py-3 text-sm text-zinc-200 outline-none transition-all font-mono placeholder:text-zinc-700 ${!key ? 'border-red-500/50 focus:border-red-500' : 'border-zinc-800 focus:border-[#00e5ff]'}`}
+                          />
+                        </div>
+                      </div>
+                    ))}
                   </div>
+                  
+                  {geminiApiKeys.length < 5 && (
+                    <button 
+                      onClick={() => {
+                        const newKeys = [...geminiApiKeys, ""];
+                        setGeminiApiKeys(newKeys);
+                        localStorage.setItem('user_gemini_api_keys', JSON.stringify(newKeys));
+                        setSelectedGeminiKeyIndex(newKeys.length - 1);
+                        localStorage.setItem('selected_gemini_key_index', (newKeys.length - 1).toString());
+                      }}
+                      className="w-full py-3 rounded-xl border border-zinc-800 border-dashed text-zinc-500 hover:text-zinc-300 hover:border-zinc-600 flex items-center justify-center gap-2 text-xs font-bold transition-all"
+                    >
+                      <Plus className="w-4 h-4" /> 키 추가하기
+                    </button>
+                  )}
+
                   <div className="relative mt-2">
                     <select
                       value={geminiModel}
@@ -148,7 +201,7 @@ export const ApiKeyModal = ({
                       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m6 9 6 6 6-6"/></svg>
                     </div>
                   </div>
-                </>
+                </div>
               ) : aiProvider === 'cerebras' ? (
                 <>
                   <div className="relative">
@@ -242,8 +295,12 @@ export const ApiKeyModal = ({
                 <button 
                   onClick={() => {
                     if (aiProvider === 'gemini') {
-                      setUserApiKey('');
+                      const newKeys = [""];
+                      setGeminiApiKeys(newKeys);
+                      setSelectedGeminiKeyIndex(0);
+                      localStorage.removeItem('user_gemini_api_keys');
                       localStorage.removeItem('user_gemini_api_key');
+                      localStorage.setItem('selected_gemini_key_index', '0');
                     } else if (aiProvider === 'cerebras') {
                       setCerebrasApiKey('');
                       localStorage.removeItem('user_cerebras_api_key');

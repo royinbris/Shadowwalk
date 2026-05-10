@@ -133,9 +133,21 @@ export default function App() {
   const [isPlayerReady, setIsPlayerReady] = useState(false);
   const [showSyncControls, setShowSyncControls] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [userApiKey, setUserApiKey] = useState(
-    () => localStorage.getItem("user_gemini_api_key") || "",
+  const [geminiApiKeys, setGeminiApiKeys] = useState<string[]>(() => {
+    try {
+      const saved = localStorage.getItem("user_gemini_api_keys");
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch {}
+    const legacy = localStorage.getItem("user_gemini_api_key");
+    return legacy ? [legacy] : [""];
+  });
+  const [selectedGeminiKeyIndex, setSelectedGeminiKeyIndex] = useState(
+    () => parseInt(localStorage.getItem("selected_gemini_key_index") || "0", 10),
   );
+  const userApiKey = geminiApiKeys[selectedGeminiKeyIndex] || "";
   const [geminiModel, setGeminiModel] = useState(
     () => localStorage.getItem("user_gemini_model") || GEMINI_MODEL,
   );
@@ -4462,8 +4474,10 @@ ${actualQuery}`;
             onClose={() => setIsApiKeyModalOpen(false)}
             aiProvider={aiProvider as any}
             setAiProvider={setAiProvider as any}
-            userApiKey={userApiKey}
-            setUserApiKey={setUserApiKey}
+            geminiApiKeys={geminiApiKeys}
+            setGeminiApiKeys={setGeminiApiKeys}
+            selectedGeminiKeyIndex={selectedGeminiKeyIndex}
+            setSelectedGeminiKeyIndex={setSelectedGeminiKeyIndex}
             geminiModel={geminiModel}
             setGeminiModel={setGeminiModel}
             cerebrasApiKey={cerebrasApiKey}
