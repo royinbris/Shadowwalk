@@ -1,0 +1,6 @@
+{
+  "name": "ShadowWalk",
+  "description": "A walking-friendly YouTube shadowing app with large controls and auto-pause features for English listening practice.",
+  "requestFramePermissions": ["microphone"],
+  "majorCapabilities": []
+}
