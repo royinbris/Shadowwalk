@@ -20,6 +20,7 @@ import {
   formatTranscriptToUnified,
   exportProject,
   printSubtitles,
+  preprocessSrt,
 } from "./utils";
 import { RefinementPromptModal } from "./components/RefinementPromptModal";
 import { ProjectCard } from "./components/ProjectCard";
@@ -835,14 +836,15 @@ export default function App() {
     if (!unifiedInput.trim()) return;
     setError(null);
 
-    const lines = unifiedInput.split("\n");
+    const processedInput = preprocessSrt(unifiedInput);
+    const lines = processedInput.split("\n");
     let title = "";
     let url = "";
     let videoIdToUse = "";
 
     // 1. Try to find Title and URL with prefixes
-    const titleMatch = unifiedInput.match(/Title:\s*(.*)/i);
-    const urlMatch = unifiedInput.match(/URL:\s*(.*)/i);
+    const titleMatch = processedInput.match(/Title:\s*(.*)/i);
+    const urlMatch = processedInput.match(/URL:\s*(.*)/i);
 
     if (titleMatch) title = titleMatch[1].trim();
     if (urlMatch) url = urlMatch[1].trim();
@@ -978,7 +980,7 @@ export default function App() {
   const autoFormatTranscript = () => {
     if (!unifiedInput.trim()) return;
 
-    let formatted = unifiedInput;
+    let formatted = preprocessSrt(unifiedInput);
 
     // Remove YouTube UI artifacts (e.g., [Music], [Laughter]) if requested, or just clean noise
     formatted = formatted.replace(/\[(Music|Laughter|Applause|Music)\]/gi, "");

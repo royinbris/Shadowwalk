@@ -135,3 +135,44 @@ export const printSubtitles = (items: TranscriptItem[], type: 'all' | 'en', titl
   `);
   printWindow.document.close();
 };
+
+export const preprocessSrt = (text: string): string => {
+  if (!text.includes("-->")) return text;
+
+  let formatted = text.replace(/\[(Music|Laughter|Applause|Music)\]/gi, "");
+  const lines = formatted.split("\n").map(l => l.trim()).filter(l => l);
+  const isSrt = lines.some(l => l.includes("-->"));
+  
+  if (!isSrt) return text;
+
+  const resultLines: string[] = [];
+  for (let i = 0; i < lines.length; i++) {
+    if (/^\d+$/.test(lines[i]) && lines[i+1] && lines[i+1].includes("-->")) {
+      continue;
+    }
+    
+    const srtTimeMatch = lines[i].match(/^(\d{2}):(\d{2}):(\d{2}),(\d{3})\s*-->/);
+    if (srtTimeMatch) {
+      const h = parseInt(srtTimeMatch[1], 10);
+      const m = parseInt(srtTimeMatch[2], 10);
+      const s = parseInt(srtTimeMatch[3], 10);
+      
+      const timeStr = h > 0 
+        ? `${h}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`
+        : `${m}:${s.toString().padStart(2, '0')}`;
+      
+      const textArr = [];
+      let j = i + 1;
+      while(j < lines.length && !/^\d+$/.test(lines[j]) && !lines[j].includes("-->") && !lines[j].toLowerCase().startsWith("title:") && !lines[j].toLowerCase().startsWith("url:")) {
+        textArr.push(lines[j]);
+        j++;
+      }
+      
+      resultLines.push(`(${timeStr}) ${textArr.join(" ")}`);
+      i = j - 1; 
+    } else {
+      resultLines.push(lines[i]);
+    }
+  }
+  return resultLines.join("\n");
+};
