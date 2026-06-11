@@ -1,5 +1,5 @@
-import React from 'react';
-import { Sparkles, Repeat, Settings, Key, Printer, Copy } from 'lucide-react';
+import React, { useRef } from 'react';
+import { Sparkles, Repeat, Settings, Key, Printer, Copy, FileUp } from 'lucide-react';
 import { Project } from '../types';
 
 interface ScriptEditorProps {
@@ -35,6 +35,22 @@ export const ScriptEditor = ({
 }: ScriptEditorProps) => {
   const [isEnglishOnly, setIsEnglishOnly] = React.useState(false);
   const [storedInput, setStoredInput] = React.useState('');
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const text = event.target?.result as string;
+      if (text) {
+        setUnifiedInput(unifiedInput ? unifiedInput + '\n\n' + text : text);
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = ''; // Reset input so the same file can be selected again
+  };
 
   return (
     <div className="flex-1 w-full flex flex-col space-y-4 overflow-hidden overflow-y-auto min-h-0">
@@ -66,6 +82,20 @@ export const ScriptEditor = ({
                     자동 수정
                   </button>
                 )}
+                <button 
+                  onClick={() => fileInputRef.current?.click()}
+                  className="bg-emerald-600/20 hover:bg-emerald-600/30 px-2.5 py-1.5 rounded-lg border border-emerald-500/30 text-[9px] font-bold uppercase tracking-wider transition-all text-emerald-400 flex items-center gap-1 active:scale-95 shadow-lg"
+                >
+                  <FileUp size={10} />
+                  SRT 열기
+                </button>
+                <input
+                  type="file"
+                  accept=".srt,.txt"
+                  ref={fileInputRef}
+                  onChange={handleFileUpload}
+                  className="hidden"
+                />
                 <button 
                   onClick={() => setIsEditingPrompt(true)}
                   className="bg-zinc-900 hover:bg-zinc-800 px-2.5 py-1.5 rounded-lg text-[9px] font-bold uppercase tracking-wider transition-all text-zinc-300 border border-zinc-800 flex items-center gap-1 active:scale-95"
