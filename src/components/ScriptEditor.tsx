@@ -36,6 +36,7 @@ export const ScriptEditor = ({
   const [isEnglishOnly, setIsEnglishOnly] = React.useState(false);
   const [storedInput, setStoredInput] = React.useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const txtFileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -93,6 +94,20 @@ export const ScriptEditor = ({
                   type="file"
                   accept=".srt,.txt"
                   ref={fileInputRef}
+                  onChange={handleFileUpload}
+                  className="hidden"
+                />
+                <button 
+                  onClick={() => txtFileInputRef.current?.click()}
+                  className="bg-blue-600/20 hover:bg-blue-600/30 px-2.5 py-1.5 rounded-lg border border-blue-500/30 text-[9px] font-bold uppercase tracking-wider transition-all text-blue-400 flex items-center gap-1 active:scale-95 shadow-lg"
+                >
+                  <FileUp size={10} />
+                  TXT 열기
+                </button>
+                <input
+                  type="file"
+                  accept=".txt"
+                  ref={txtFileInputRef}
                   onChange={handleFileUpload}
                   className="hidden"
                 />
