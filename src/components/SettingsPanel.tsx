@@ -56,6 +56,7 @@ interface SettingsPanelProps {
 
   themeId: string;
   setThemeId: (id: string) => void;
+  setShowGestureHelp: (val: boolean) => void;
 }
 
 export const SettingsPanel = ({
@@ -75,7 +76,7 @@ export const SettingsPanel = ({
   aiProvider, setAiProvider, setIsApiKeyModalOpen, testApiKey, userApiKey, cerebrasApiKey, openrouterApiKey,
   isAutoPause, setIsAutoPause,
   isAutoAdvanceLoop, setIsAutoAdvanceLoop,
-  themeId, setThemeId
+  themeId, setThemeId, setShowGestureHelp
 }: SettingsPanelProps) => {
 
   return (
@@ -273,6 +274,14 @@ export const SettingsPanel = ({
           </div>
 
           <div className="flex bg-zinc-900 rounded-xl p-1 gap-1 border border-zinc-800/50 mt-2">
+            <button
+              onClick={() => setShowGestureHelp(true)}
+              className="flex-1 px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-400 hover:text-white rounded-lg transition-colors flex items-center justify-center gap-1 border border-zinc-700"
+              title="Gesture Guide"
+            >
+              <HelpCircle size={12} />
+              <span className="text-[12px] font-black uppercase tracking-tighter text-center">Gesture Guide</span>
+            </button>
             <button
               onClick={() => setIsApiKeyModalOpen(true)}
               className="flex-1 px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-400 hover:text-white rounded-lg transition-colors flex items-center justify-center gap-1 border border-zinc-700"

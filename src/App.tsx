@@ -643,6 +643,7 @@ export default function App() {
   const resumeGuardTimerRef = useRef<any>(null);
   const expectedSeekTargetRef = useRef<{ time: number; timestamp: number } | null>(null);
   const seekLoopRef = useRef<any>(null);
+  const wasPlayingOnPointerDownRef = useRef<boolean>(false);
 
   // Key repeat management for Option + Arrow keys
   const keyRepeatTimerRef = useRef<any>(null);
@@ -3380,6 +3381,14 @@ ${actualQuery}`;
                               ref={captionAreaRef}
                               onPointerDown={() => {
                                 window.speechSynthesis.cancel();
+                                let wasPlaying = false;
+                                if (currentProject?.isVideoLocal && videoRef.current) {
+                                  wasPlaying = !videoRef.current.paused;
+                                } else if (playerRef.current && typeof playerRef.current.getPlayerState === "function") {
+                                  wasPlaying = playerRef.current.getPlayerState() === window.YT.PlayerState.PLAYING;
+                                }
+                                wasPlayingOnPointerDownRef.current = wasPlaying;
+
                                 setIsPlaying(false);
                                 if (currentProject?.isVideoLocal && videoRef.current) {
                                   videoRef.current.pause();
@@ -3449,7 +3458,13 @@ ${actualQuery}`;
                                     } else if (count === 1) {
                                       if (ratio < 0.33) prevSentence();
                                       else if (ratio > 0.66) nextSentence();
-                                      else togglePlay();
+                                      else {
+                                        if (wasPlayingOnPointerDownRef.current) {
+                                          wasPlayingOnPointerDownRef.current = false;
+                                        } else {
+                                          togglePlay();
+                                        }
+                                      }
                                       tapCount.current = 0;
                                     }
                                     tapCount.current = 0;
@@ -3699,6 +3714,14 @@ ${actualQuery}`;
                         className={`flex flex-col items-start justify-start px-4 text-left cursor-pointer select-none group touch-none w-full transition-all ${isFullscreen ? "absolute bottom-8 left-8 right-8 w-auto z-50 bg-black/60 shadow-xl border border-zinc-800/80 rounded-2xl pointer-events-auto cursor-move backdrop-blur-md pb-6 pt-4" : "flex-1 relative pb-4 pt-2 duration-300"}`}
                         onPointerDown={() => {
                           window.speechSynthesis.cancel();
+                          let wasPlaying = false;
+                          if (currentProject?.isVideoLocal && videoRef.current) {
+                            wasPlaying = !videoRef.current.paused;
+                          } else if (playerRef.current && typeof playerRef.current.getPlayerState === "function") {
+                            wasPlaying = playerRef.current.getPlayerState() === window.YT.PlayerState.PLAYING;
+                          }
+                          wasPlayingOnPointerDownRef.current = wasPlaying;
+
                           setIsPlaying(false);
                           if (currentProject?.isVideoLocal && videoRef.current) {
                             videoRef.current.pause();
@@ -3755,7 +3778,13 @@ ${actualQuery}`;
                               } else if (count === 1) {
                                 if (ratio < 0.33) prevSentence();
                                 else if (ratio > 0.66) nextSentence();
-                                else togglePlay();
+                                else {
+                                  if (wasPlayingOnPointerDownRef.current) {
+                                    wasPlayingOnPointerDownRef.current = false;
+                                  } else {
+                                    togglePlay();
+                                  }
+                                }
                                 tapCount.current = 0;
                               }
                               tapCount.current = 0;
@@ -4289,6 +4318,7 @@ ${actualQuery}`;
                       setIsAutoAdvanceLoop={setIsAutoAdvanceLoop}
                       themeId={themeId}
                       setThemeId={setThemeId}
+                      setShowGestureHelp={setShowGestureHelp}
                     />
                   ) : rightView === "subtitles" ? (
                     <div
