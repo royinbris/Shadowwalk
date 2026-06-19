@@ -3,11 +3,11 @@ import { X } from 'lucide-react';
 import { Project } from '../types';
 
 const GoogleDriveIcon = ({ className = "w-2.5 h-2.5" }) => (
-  <svg className={className} viewBox="0 0 144 144" xmlns="http://www.w3.org/2000/svg">
-    <path d="M42.42 123.36 12 70.78a10.27 10.27 0 0 1 0-10.27l30.42-52.58a10.27 10.27 0 0 1 8.89-5.13h61.38l-40.7 70.33a10.27 10.27 0 0 0 0 10.27l40.7 70.33H51.31a10.27 10.27 0 0 1-8.89-5.14z" fill="#4285f4"/>
-    <path d="M101.58 123.36 71.16 70.78a10.27 10.27 0 0 0 0-10.27L101.58 7.93a10.27 10.27 0 0 1 8.89-5.13h-61.38L8.39 73.13a10.27 10.27 0 0 0 0 10.27l40.7 70.33h61.38a10.27 10.27 0 0 0-8.89-5.14z" fill="#0f9d58"/>
-    <path d="M101.58 20.73 71.16 73.31a10.27 10.27 0 0 1-8.89 5.14H1.85l39.53 68.44a10.27 10.27 0 0 0 8.89 5.14h61.38a10.27 10.27 0 0 0 8.89-5.14l30.42-52.58a10.27 10.27 0 0 0 0-10.27L110.47 25.86a10.27 10.27 0 0 0-8.89-5.13z" fill="#ffc107"/>
-  </svg>
+  <img 
+    src="https://upload.wikimedia.org/wikipedia/commons/1/12/Google_Drive_icon_%282020%29.svg" 
+    className={className} 
+    alt="Drive" 
+  />
 );
 
 interface ProjectCardProps {
