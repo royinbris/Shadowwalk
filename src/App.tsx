@@ -3099,6 +3099,14 @@ ${actualQuery}`;
                 handleLocalFileSelection={handleLocalFileSelection}
                 startNewProject={startNewProject}
                 openEditor={openEditor}
+                onOpenDriveImport={() => {
+                  if (!googleClientId) {
+                    alert("설정(API Key Settings)에서 Google Client ID를 먼저 입력해주세요.");
+                    setIsApiKeyModalOpen(true);
+                    return;
+                  }
+                  setIsDriveImportModalOpen(true);
+                }}
               />
             )}
 
@@ -4284,7 +4292,14 @@ ${actualQuery}`;
                       handleFileImport={handleFileImport}
                       handleLocalFileSelection={handleLocalFileSelection}
                       startNewProject={startNewProject}
-                      onOpenDriveImport={() => setIsDriveImportModalOpen(true)}
+                      onOpenDriveImport={() => {
+                        if (!googleClientId) {
+                          alert("설정(API Key Settings)에서 Google Client ID를 먼저 입력해주세요.");
+                          setIsApiKeyModalOpen(true);
+                          return;
+                        }
+                        setIsDriveImportModalOpen(true);
+                      }}
                     />
                   ) : rightView === "settings" ? (
                     <SettingsPanel
