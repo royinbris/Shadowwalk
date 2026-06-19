@@ -1,8 +1,16 @@
 import React, { useRef } from 'react';
 import { motion } from 'motion/react';
-import { Upload, Plus, Download, FileText } from 'lucide-react';
+import { Upload, Plus, Download, FileText, Cloud } from 'lucide-react';
 import { Project } from '../types';
 import { ProjectCard } from './ProjectCard';
+
+const GoogleDriveIcon = ({ className = "w-3.5 h-3.5" }) => (
+  <svg className={className} viewBox="0 0 87.3 78" xmlns="http://www.w3.org/2000/svg">
+    <path d="M58.2 78L87.3 27.6L58.2 0L29.1 50.4L58.2 78Z" fill="#FFC107"/>
+    <path d="M29.1 78L0 27.6L29.1 0L58.2 50.4L29.1 78Z" fill="#1976D2"/>
+    <path d="M87.3 27.6L58.2 78L0 78L29.1 27.6L87.3 27.6Z" fill="#4CAF50"/>
+  </svg>
+);
 
 interface LibraryViewProps {
   projects: Project[];
@@ -65,28 +73,26 @@ export const LibraryView = ({
             */}
             <button 
               onClick={startNewProject}
-              className="flex items-center gap-2 bg-zinc-800 hover:bg-zinc-700 px-4 py-2 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all text-zinc-400 border border-zinc-700"
+              className="flex items-center gap-1.5 bg-zinc-800 hover:bg-zinc-700 px-3 py-2 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all text-zinc-300 border border-zinc-700"
             >
-              <Plus className="w-3 h-3" />
-              New Script
+              <Plus className="w-3.5 h-3.5" />
+              New
             </button>
-            {/*
             <button 
               onClick={() => fileInputRef.current?.click()}
-              className="flex items-center gap-2 bg-zinc-800 hover:bg-zinc-700 px-4 py-2 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all text-zinc-400"
+              className="flex items-center gap-1.5 bg-zinc-800 hover:bg-zinc-700 px-3 py-2 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all text-zinc-300 border border-zinc-700"
             >
-              <Download className="w-3 h-3" />
-              Import File
+              <Cloud className="w-3.5 h-3.5 text-sky-400" />
+              iCloud
             </button>
-            */}
             <button 
               onClick={onOpenDriveImport}
-              className="flex items-center gap-2 bg-blue-900/30 hover:bg-blue-800/50 px-4 py-2 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all text-blue-400 border border-blue-900/50"
+              className="flex items-center gap-1.5 bg-zinc-800 hover:bg-zinc-700 px-3 py-2 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all text-zinc-300 border border-zinc-700"
             >
-              <Download className="w-3 h-3" />
-              Drive에서 불러오기
+              <GoogleDriveIcon />
+              Drive
             </button>
-            <span className="text-zinc-500 font-mono text-[10px] self-center ml-2">{projects.length} ITEMS</span>
+            <span className="text-zinc-500 font-mono text-[10px] self-center ml-1">{projects.length} ITEMS</span>
           </div>
         </div>
 

@@ -2,6 +2,14 @@ import React from 'react';
 import { X } from 'lucide-react';
 import { Project } from '../types';
 
+const GoogleDriveIcon = ({ className = "w-2.5 h-2.5" }) => (
+  <svg className={className} viewBox="0 0 87.3 78" xmlns="http://www.w3.org/2000/svg">
+    <path d="M58.2 78L87.3 27.6L58.2 0L29.1 50.4L58.2 78Z" fill="#FFC107"/>
+    <path d="M29.1 78L0 27.6L29.1 0L58.2 50.4L29.1 78Z" fill="#1976D2"/>
+    <path d="M87.3 27.6L58.2 78L0 78L29.1 27.6L87.3 27.6Z" fill="#4CAF50"/>
+  </svg>
+);
+
 interface ProjectCardProps {
   project: Project;
   currentProject: Project | null;
@@ -52,10 +60,11 @@ export const ProjectCard = ({
         <div className="flex items-center gap-1 shrink-0">
           <button
             onClick={(e) => { e.stopPropagation(); exportProject(project); }}
-            className="flex items-center gap-0.5 px-1.5 py-0.5 bg-zinc-800 hover:bg-yellow-500 hover:text-black text-yellow-500 rounded transition-all border border-yellow-500/20 text-[8px] uppercase font-bold shrink-0"
-            title="Export to File"
+            className="flex items-center gap-1 px-1.5 py-0.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 rounded transition-all border border-zinc-700 text-[8px] uppercase font-bold shrink-0"
+            title="Export to Google Drive"
           >
-            EXPORT
+            <GoogleDriveIcon />
+            DRIVE
           </button>
           <button 
             onClick={(e) => { e.stopPropagation(); deleteProject(project.id); }}

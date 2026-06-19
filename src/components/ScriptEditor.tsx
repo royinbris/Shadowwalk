@@ -2,6 +2,14 @@ import React, { useRef } from 'react';
 import { Sparkles, Repeat, Settings, Key, Printer, Copy, FileUp } from 'lucide-react';
 import { Project } from '../types';
 
+const GoogleDriveIcon = ({ className = "w-3 h-3" }) => (
+  <svg className={className} viewBox="0 0 87.3 78" xmlns="http://www.w3.org/2000/svg">
+    <path d="M58.2 78L87.3 27.6L58.2 0L29.1 50.4L58.2 78Z" fill="#FFC107"/>
+    <path d="M29.1 78L0 27.6L29.1 0L58.2 50.4L29.1 78Z" fill="#1976D2"/>
+    <path d="M87.3 27.6L58.2 78L0 78L29.1 27.6L87.3 27.6Z" fill="#4CAF50"/>
+  </svg>
+);
+
 interface ScriptEditorProps {
   isLoading: boolean;
   unifiedInput: string;
@@ -287,9 +295,10 @@ export const ScriptEditor = ({
                     else if (currentProject) exportProject(currentProject);
                     else alert("저장 가능한 스크립트가 없습니다. 먼저 작성해 주세요.");
                   }}
-                  className="bg-zinc-800 hover:bg-zinc-700 px-2.5 py-1.5 rounded-lg text-[9px] font-bold uppercase tracking-wider transition-all text-zinc-300 border border-zinc-700 active:scale-95"
+                  className="bg-zinc-800 hover:bg-zinc-700 px-2.5 py-1.5 rounded-lg text-[9px] font-bold uppercase tracking-wider transition-all text-zinc-300 border border-zinc-700 active:scale-95 flex items-center gap-1.5"
                 >
-                  Export
+                  <GoogleDriveIcon />
+                  DRIVE
                 </button>
                 <button 
                   onClick={saveProject}
