@@ -14,6 +14,7 @@ interface LibraryViewProps {
   handleLocalFileSelection: (e: React.ChangeEvent<HTMLInputElement>) => void;
   startNewProject: () => void;
   openEditor: () => void;
+  onOpenDriveImport: () => void;
 }
 
 export const LibraryView = ({
@@ -25,7 +26,8 @@ export const LibraryView = ({
   handleFileImport,
   handleLocalFileSelection,
   startNewProject,
-  openEditor
+  openEditor,
+  onOpenDriveImport
 }: LibraryViewProps) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -72,6 +74,13 @@ export const LibraryView = ({
             >
               <Download className="w-3 h-3" />
               Import File
+            </button>
+            <button 
+              onClick={onOpenDriveImport}
+              className="flex items-center gap-2 bg-blue-900/30 hover:bg-blue-800/50 px-4 py-2 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all text-blue-400 border border-blue-900/50"
+            >
+              <Download className="w-3 h-3" />
+              Drive에서 불러오기
             </button>
             <span className="text-zinc-500 font-mono text-[10px] self-center ml-2">{projects.length} ITEMS</span>
           </div>

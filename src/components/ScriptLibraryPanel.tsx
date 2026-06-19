@@ -12,6 +12,7 @@ interface ScriptLibraryPanelProps {
   handleFileImport: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleLocalFileSelection: (e: React.ChangeEvent<HTMLInputElement>) => void;
   startNewProject: () => void;
+  onOpenDriveImport: () => void;
 }
 
 export const ScriptLibraryPanel = ({
@@ -22,7 +23,8 @@ export const ScriptLibraryPanel = ({
   deleteProject,
   handleFileImport,
   handleLocalFileSelection,
-  startNewProject
+  startNewProject,
+  onOpenDriveImport
 }: ScriptLibraryPanelProps) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -66,6 +68,13 @@ export const ScriptLibraryPanel = ({
           >
             <Download className="w-3 h-3" />
             Import
+          </button>
+          <button
+            onClick={onOpenDriveImport}
+            className="flex items-center gap-2 bg-blue-900/30 hover:bg-blue-800/50 px-3 py-2 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all text-blue-400 border border-blue-900/50"
+          >
+            <Download className="w-3 h-3" />
+            Drive
           </button>
         </div>
       </div>

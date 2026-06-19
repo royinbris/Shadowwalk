@@ -183,14 +183,47 @@ export const exportToGoogleDrive = (project: Project, clientId: string) => {
   const fileName = `${project.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.json`;
   const content = JSON.stringify(project, null, 2);
 
+  const FOLDER_NAME = '유튭영어';
+
+  const getOrCreateDriveFolder = async (accessToken: string) => {
+    const query = `name='${FOLDER_NAME}' and mimeType='application/vnd.google-apps.folder' and trashed=false`;
+    const res = await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(query)}&fields=files(id)`, {
+      headers: { Authorization: `Bearer ${accessToken}` }
+    });
+    const data = await res.json();
+    if (data.files && data.files.length > 0) {
+      return data.files[0].id;
+    }
+    
+    const createRes = await fetch('https://www.googleapis.com/drive/v3/files', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        name: FOLDER_NAME,
+        mimeType: 'application/vnd.google-apps.folder'
+      })
+    });
+    const createData = await createRes.json();
+    return createData.id;
+  };
+
   const initClient = () => {
     try {
       const client = (window as any).google.accounts.oauth2.initTokenClient({
         client_id: clientId,
         scope: 'https://www.googleapis.com/auth/drive.file',
-        callback: (tokenResponse: any) => {
+        callback: async (tokenResponse: any) => {
           if (tokenResponse && tokenResponse.access_token) {
-            uploadFile(tokenResponse.access_token);
+            try {
+              const folderId = await getOrCreateDriveFolder(tokenResponse.access_token);
+              await uploadFile(tokenResponse.access_token, folderId);
+            } catch (err) {
+              console.error("Folder creation or upload failed", err);
+              alert("Google Drive 폴더 생성 또는 파일 업로드에 실패했습니다.");
+            }
           } else {
             console.error("Token response:", tokenResponse);
             alert("Google 권한 승인이 취소되었거나 오류가 발생했습니다.");
@@ -204,7 +237,7 @@ export const exportToGoogleDrive = (project: Project, clientId: string) => {
     }
   };
 
-  const uploadFile = async (accessToken: string) => {
+  const uploadFile = async (accessToken: string, folderId: string) => {
     const boundary = '-------314159265358979323846';
     const delimiter = "\r\n--" + boundary + "\r\n";
     const close_delim = "\r\n--" + boundary + "--";
@@ -212,7 +245,8 @@ export const exportToGoogleDrive = (project: Project, clientId: string) => {
     const contentType = 'application/json';
     const metadata = {
       name: fileName,
-      mimeType: contentType
+      mimeType: contentType,
+      parents: [folderId]
     };
 
     const multipartRequestBody =
@@ -234,7 +268,7 @@ export const exportToGoogleDrive = (project: Project, clientId: string) => {
         body: multipartRequestBody,
       });
       if (res.ok) {
-        alert(`Google Drive에 성공적으로 저장되었습니다!\n파일 이름: ${fileName}`);
+        alert(`Google Drive '${FOLDER_NAME}' 폴더에 성공적으로 저장되었습니다!\\n파일 이름: ${fileName}`);
       } else {
         const err = await res.text();
         console.error("Failed to upload to Google Drive", err);
@@ -251,5 +285,34 @@ export const exportToGoogleDrive = (project: Project, clientId: string) => {
   } else {
     alert("Google Identity Services 로딩 중입니다. 잠시 후 다시 시도해주세요.");
   }
+};
+
+export const fetchGoogleDriveFiles = async (accessToken: string) => {
+  const FOLDER_NAME = '유튭영어';
+  const queryFolder = `name='${FOLDER_NAME}' and mimeType='application/vnd.google-apps.folder' and trashed=false`;
+  const folderRes = await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(queryFolder)}&fields=files(id)`, {
+    headers: { Authorization: `Bearer ${accessToken}` }
+  });
+  const folderData = await folderRes.json();
+  if (!folderData.files || folderData.files.length === 0) {
+    return []; // Folder doesn't exist yet
+  }
+  const folderId = folderData.files[0].id;
+
+  const query = `'${folderId}' in parents and mimeType='application/json' and trashed=false`;
+  const res = await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(query)}&fields=files(id,name,modifiedTime)&orderBy=modifiedTime desc`, {
+    headers: { Authorization: `Bearer ${accessToken}` }
+  });
+  const data = await res.json();
+  return data.files || [];
+};
+
+export const downloadGoogleDriveFile = async (accessToken: string, fileId: string) => {
+  const res = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`, {
+    headers: { Authorization: `Bearer ${accessToken}` }
+  });
+  if (!res.ok) throw new Error("Failed to download file");
+  const text = await res.text();
+  return JSON.parse(text);
 };
 

@@ -28,6 +28,7 @@ import { ProjectCard } from "./components/ProjectCard";
 import { PromptEditorModal } from "./components/PromptEditorModal";
 import { THEMES } from "./themes";
 import { ApiKeyModal } from "./components/ApiKeyModal";
+import { GoogleDriveImportModal } from "./components/GoogleDriveImportModal";
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import {
   Play,
@@ -186,6 +187,7 @@ export default function App() {
     }
   }, [googleClientId]);
   const [isApiKeyModalOpen, setIsApiKeyModalOpen] = useState(false);
+  const [isDriveImportModalOpen, setIsDriveImportModalOpen] = useState(false);
   const [isContinuous, setIsContinuous] = useState(true);
   const [isAutoAdvanceLoop, setIsAutoAdvanceLoop] = useState(true);
   const [isSubtitleOnly, setIsSubtitleOnly] = useState(false);
@@ -4282,6 +4284,7 @@ ${actualQuery}`;
                       handleFileImport={handleFileImport}
                       handleLocalFileSelection={handleLocalFileSelection}
                       startNewProject={startNewProject}
+                      onOpenDriveImport={() => setIsDriveImportModalOpen(true)}
                     />
                   ) : rightView === "settings" ? (
                     <SettingsPanel
@@ -4509,6 +4512,18 @@ ${actualQuery}`;
             onClose={() => setIsEditingPrompt(false)}
             refinementPrompt={refinementPrompt}
             setRefinementPrompt={setRefinementPrompt}
+          />
+
+          {/* Google Drive Import Modal */}
+          <GoogleDriveImportModal
+            isOpen={isDriveImportModalOpen}
+            onClose={() => setIsDriveImportModalOpen(false)}
+            googleClientId={googleClientId}
+            onImport={(project) => {
+              saveProject(project);
+              loadProject(project);
+              setView("editor");
+            }}
           />
 
           {/* API Key Modal */}
