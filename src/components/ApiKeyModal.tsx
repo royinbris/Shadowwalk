@@ -21,6 +21,8 @@ interface ApiKeyModalProps {
   setOpenrouterApiKey: (key: string) => void;
   openrouterModel: string;
   setOpenrouterModel: (model: string) => void;
+  googleClientId: string;
+  setGoogleClientId: (id: string) => void;
   isApiKeyVisible: boolean;
   setIsApiKeyVisible: (visible: boolean) => void;
   testApiKey: () => void;
@@ -46,6 +48,8 @@ export const ApiKeyModal = ({
   setOpenrouterApiKey,
   openrouterModel,
   setOpenrouterModel,
+  googleClientId,
+  setGoogleClientId,
   isApiKeyVisible,
   setIsApiKeyVisible,
   testApiKey,
@@ -92,14 +96,14 @@ export const ApiKeyModal = ({
                     setAiProvider('gemini');
                     localStorage.setItem('user_ai_provider', 'gemini');
                   }}
-                  className={`flex-1 py-3 rounded-2xl font-bold transition-all text-xs ${aiProvider === 'gemini' ? 'bg-[#00e5ff] text-black' : 'bg-black/40 text-zinc-400 border border-zinc-800'}`}
+                  className={`flex-1 py-3 rounded-2xl font-bold transition-all text-[11px] ${aiProvider === 'gemini' ? 'bg-[#00e5ff] text-black' : 'bg-black/40 text-zinc-400 border border-zinc-800'}`}
                 >Gemini</button>
                 <button
                   onClick={() => {
                     setAiProvider('cerebras');
                     localStorage.setItem('user_ai_provider', 'cerebras');
                   }}
-                  className={`flex-1 py-3 rounded-2xl font-bold transition-all text-xs ${aiProvider === 'cerebras' ? 'bg-[#ff00ff] text-white' : 'bg-black/40 text-zinc-400 border border-zinc-800'}`}
+                  className={`flex-1 py-3 rounded-2xl font-bold transition-all text-[11px] ${aiProvider === 'cerebras' ? 'bg-[#ff00ff] text-white' : 'bg-black/40 text-zinc-400 border border-zinc-800'}`}
                 >Cerebras</button>
                 <button
                   onClick={() => {
@@ -108,6 +112,35 @@ export const ApiKeyModal = ({
                   }}
                   className={`flex-1 py-3 rounded-2xl font-bold transition-all text-[11px] ${aiProvider === 'openrouter' ? 'bg-[#00ff88] text-black' : 'bg-black/40 text-zinc-400 border border-zinc-800'}`}
                 >OpenRouter</button>
+              </div>
+
+              <div className="pt-4 border-t border-zinc-800 mt-2">
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="text-sm font-black uppercase tracking-tighter text-blue-400 flex items-center gap-2">
+                    Google Drive 연동
+                  </h3>
+                  <a 
+                    href="https://console.cloud.google.com/apis/credentials"
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-[10px] font-bold text-zinc-500 hover:text-blue-400 underline underline-offset-2 transition-colors"
+                  >
+                    Google Client ID 발급하기 →
+                  </a>
+                </div>
+                <div className="relative mt-2 mb-4">
+                  <input 
+                    type={isApiKeyVisible ? "text" : "password"}
+                    value={googleClientId}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setGoogleClientId(val);
+                      localStorage.setItem('user_google_client_id', val);
+                    }}
+                    placeholder="Google Client ID 입력..."
+                    className="w-full bg-black/40 border border-zinc-800 focus:border-blue-400 rounded-2xl px-5 py-3 text-sm text-zinc-200 outline-none transition-all font-mono placeholder:text-zinc-700"
+                  />
+                </div>
               </div>
 
               {aiProvider === 'gemini' ? (
@@ -308,6 +341,8 @@ export const ApiKeyModal = ({
                       setOpenrouterApiKey('');
                       localStorage.removeItem('user_openrouter_api_key');
                     }
+                    setGoogleClientId('');
+                    localStorage.removeItem('user_google_client_id');
                   }}
                   className="bg-zinc-800 hover:bg-zinc-700 text-zinc-400 py-3 rounded-xl text-xs font-bold transition-all border border-zinc-700 active:scale-95"
                 >

@@ -19,6 +19,7 @@ import {
   extractVideoId,
   formatTranscriptToUnified,
   exportProject,
+  exportToGoogleDrive,
   printSubtitles,
   preprocessSrt,
 } from "./utils";
@@ -164,6 +165,9 @@ export default function App() {
   const [openrouterModel, setOpenrouterModel] = useState(
     () => localStorage.getItem("user_openrouter_model") || "qwen/qwen-3-235b",
   );
+  const [googleClientId, setGoogleClientId] = useState(
+    () => localStorage.getItem("user_google_client_id") || "",
+  );
   const [aiProvider, setAiProvider] = useState<
     "gemini" | "cerebras" | "openrouter"
   >(
@@ -174,6 +178,13 @@ export default function App() {
         | "openrouter") || "gemini",
   );
   const [isApiKeyVisible, setIsApiKeyVisible] = useState(false);
+
+  const handleExportProject = useCallback((project: Project) => {
+    exportProject(project);
+    if (googleClientId) {
+      exportToGoogleDrive(project, googleClientId);
+    }
+  }, [googleClientId]);
   const [isApiKeyModalOpen, setIsApiKeyModalOpen] = useState(false);
   const [isContinuous, setIsContinuous] = useState(true);
   const [isAutoAdvanceLoop, setIsAutoAdvanceLoop] = useState(true);
@@ -3080,7 +3091,7 @@ ${actualQuery}`;
                 projects={projects}
                 currentProject={currentProject}
                 loadProject={loadProject}
-                exportProject={exportProject}
+                exportProject={handleExportProject}
                 deleteProject={deleteProject}
                 handleFileImport={handleFileImport}
                 handleLocalFileSelection={handleLocalFileSelection}
@@ -3109,7 +3120,7 @@ ${actualQuery}`;
                   showCopyFeedback={showCopyFeedback}
                   setView={setView}
                   currentProject={currentProject}
-                  exportProject={exportProject}
+                  exportProject={handleExportProject}
                   saveProject={saveProject}
                   error={error}
                 />
@@ -4266,7 +4277,7 @@ ${actualQuery}`;
                       projects={projects}
                       currentProject={currentProject}
                       loadProject={loadProject}
-                      exportProject={exportProject}
+                      exportProject={handleExportProject}
                       deleteProject={deleteProject}
                       handleFileImport={handleFileImport}
                       handleLocalFileSelection={handleLocalFileSelection}
@@ -4421,7 +4432,7 @@ ${actualQuery}`;
                         showCopyFeedback={showCopyFeedback}
                         setView={setView}
                         currentProject={currentProject}
-                        exportProject={exportProject}
+                        exportProject={handleExportProject}
                         saveProject={saveProject}
                         error={error}
                       />
@@ -4518,6 +4529,8 @@ ${actualQuery}`;
             setCerebrasModel={setCerebrasModel}
             openrouterApiKey={openrouterApiKey}
             setOpenrouterApiKey={setOpenrouterApiKey}
+            googleClientId={googleClientId}
+            setGoogleClientId={setGoogleClientId}
             openrouterModel={openrouterModel}
             setOpenrouterModel={setOpenrouterModel}
             isApiKeyVisible={isApiKeyVisible}

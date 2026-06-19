@@ -176,3 +176,66 @@ export const preprocessSrt = (text: string): string => {
   }
   return resultLines.join("\n");
 };
+
+export const exportToGoogleDrive = (project: Project, clientId: string) => {
+  if (!clientId || typeof window === 'undefined') return;
+
+  const fileName = `${project.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.json`;
+  const content = JSON.stringify(project, null, 2);
+
+  const initClient = () => {
+    try {
+      const client = (window as any).google.accounts.oauth2.initTokenClient({
+        client_id: clientId,
+        scope: 'https://www.googleapis.com/auth/drive.file',
+        callback: (tokenResponse: any) => {
+          if (tokenResponse && tokenResponse.access_token) {
+            uploadFile(tokenResponse.access_token);
+          }
+        },
+      });
+      client.requestAccessToken();
+    } catch (err) {
+      console.error("Failed to init Google Token Client", err);
+      alert("Google Drive 인증 창을 띄우지 못했습니다. Client ID를 확인해주세요.");
+    }
+  };
+
+  const uploadFile = async (accessToken: string) => {
+    const metadata = {
+      name: fileName,
+      mimeType: 'application/json',
+    };
+    const form = new FormData();
+    form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
+    form.append('file', new Blob([content], { type: 'application/json' }));
+
+    try {
+      const res = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: form,
+      });
+      if (res.ok) {
+        // Optionally show toast or alert
+        console.log("Successfully uploaded to Google Drive");
+      } else {
+        const err = await res.text();
+        console.error("Failed to upload to Google Drive", err);
+        alert("Google Drive 업로드에 실패했습니다: " + err);
+      }
+    } catch (err) {
+      console.error("Upload error", err);
+      alert("Google Drive 업로드 중 오류가 발생했습니다.");
+    }
+  };
+
+  if ((window as any).google && (window as any).google.accounts && (window as any).google.accounts.oauth2) {
+    initClient();
+  } else {
+    alert("Google Identity Services 로딩 중입니다. 잠시 후 다시 시도해주세요.");
+  }
+};
+
