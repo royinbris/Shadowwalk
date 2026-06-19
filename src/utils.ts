@@ -38,7 +38,7 @@ export const formatTranscriptToUnified = (project: Project) => {
 };
 
 export const exportProject = async (project: Project) => {
-  const fileName = `${project.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.json`;
+  const fileName = `${project.title.replace(/[^a-zA-Z0-9가-힣\s-]/g, '_')}.json`;
   const content = JSON.stringify(project, null, 2);
 
   if (typeof window !== 'undefined' && 'showSaveFilePicker' in window) {
@@ -213,7 +213,7 @@ export const getGoogleToken = (): Promise<string> => {
 export const exportToGoogleDrive = async (project: Project) => {
   if (typeof window === 'undefined') return;
 
-  const fileName = `${project.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.json`;
+  const fileName = `${project.title.replace(/[^a-zA-Z0-9가-힣\s-]/g, '_')}.json`;
   const content = JSON.stringify(project, null, 2);
 
   const FOLDER_NAME = '유튭영어';

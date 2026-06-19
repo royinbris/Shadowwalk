@@ -99,18 +99,19 @@ export const GoogleDriveImportModal: React.FC<Props> = ({
           ) : (
             files.map(file => {
               const d = new Date(file.modifiedTime);
-              const dateStr = `${d.getMonth() + 1}.${d.getDate()}`;
+              const displayName = file.name.replace(/\.json$/i, '');
               return (
                 <button
                   key={file.id}
                   onClick={() => handleFileClick(file)}
                   className="w-full flex items-center justify-between bg-black/40 border border-zinc-800 hover:border-blue-400/50 py-2 px-2.5 rounded-xl transition-all group gap-2"
                 >
-                  <div className="text-sm font-sans font-medium text-zinc-200 group-hover:text-blue-400 transition-colors line-clamp-2 text-left flex-1 break-words">
-                    {file.name}
+                  <div className="text-sm font-sans font-medium text-zinc-200 group-hover:text-blue-400 transition-colors line-clamp-2 text-left flex-1 break-words pr-1">
+                    {displayName}
                   </div>
-                  <div className="text-[10px] text-zinc-500 shrink-0">
-                    {dateStr}
+                  <div className="flex flex-col items-center justify-center bg-zinc-800/60 rounded-lg p-1.5 min-w-[2.5rem] shrink-0">
+                    <div className="text-[9px] text-zinc-400 font-bold leading-none mb-1">{d.getMonth() + 1}월</div>
+                    <div className="text-sm text-zinc-200 font-black leading-none">{d.getDate()}</div>
                   </div>
                 </button>
               );
