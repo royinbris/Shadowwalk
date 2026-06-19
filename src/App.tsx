@@ -717,6 +717,7 @@ export default function App() {
           const updatedProjects = [project, ...projects];
           saveProjectsToStorage(updatedProjects);
           loadProject(project);
+          setView("study");
         } else {
           throw new Error("Invalid project format");
         }
@@ -4517,7 +4518,7 @@ ${actualQuery}`;
             onImport={(project) => {
               saveProject(project);
               loadProject(project);
-              setView("editor");
+              setView("study");
             }}
           />
 
