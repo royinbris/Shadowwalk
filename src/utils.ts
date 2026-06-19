@@ -239,15 +239,14 @@ export const exportToGoogleDrive = async (project: Project) => {
         mimeType: 'application/vnd.google-apps.folder'
       })
     });
+    if (!createRes.ok) {
+      throw new Error(`Folder creation failed: ${await createRes.text()}`);
+    }
     const createData = await createRes.json();
     return createData.id;
   };
 
   const uploadFile = async (accessToken: string, folderId: string) => {
-    const boundary = '-------314159265358979323846';
-    const delimiter = "\r\n--" + boundary + "\r\n";
-    const close_delim = "\r\n--" + boundary + "--";
-
     const contentType = 'application/json';
     const metadata = {
       name: fileName,
@@ -255,30 +254,43 @@ export const exportToGoogleDrive = async (project: Project) => {
       parents: [folderId]
     };
 
-    const multipartRequestBody =
-      delimiter +
-      'Content-Type: application/json\r\n\r\n' +
-      JSON.stringify(metadata) +
-      delimiter +
-      'Content-Type: ' + contentType + '\r\n\r\n' +
-      content +
-      close_delim;
-
     try {
-      const res = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
+      // Step 1: Create file metadata
+      const metaRes = await fetch('https://www.googleapis.com/drive/v3/files', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${accessToken}`,
-          'Content-Type': `multipart/related; boundary=${boundary}`
+          'Content-Type': 'application/json'
         },
-        body: multipartRequestBody,
+        body: JSON.stringify(metadata)
       });
-      if (res.ok) {
+
+      if (!metaRes.ok) {
+        const err = await metaRes.text();
+        console.error("Failed to create file metadata", err);
+        alert("파일 생성에 실패했습니다 (메타데이터 오류).");
+        return;
+      }
+
+      const fileData = await metaRes.json();
+      const fileId = fileData.id;
+
+      // Step 2: Upload actual content
+      const uploadRes = await fetch(`https://www.googleapis.com/upload/drive/v3/files/${fileId}?uploadType=media`, {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': contentType
+        },
+        body: content
+      });
+
+      if (uploadRes.ok) {
         alert(`Google Drive '${FOLDER_NAME}' 폴더에 성공적으로 저장되었습니다!\\n파일 이름: ${fileName}`);
       } else {
-        const err = await res.text();
+        const err = await uploadRes.text();
         console.error("Failed to upload to Google Drive", err);
-        alert("Google Drive 업로드에 실패했습니다: " + err);
+        alert("파일 내용 업로드에 실패했습니다.");
       }
     } catch (err) {
       console.error("Upload error", err);
