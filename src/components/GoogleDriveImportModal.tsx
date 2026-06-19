@@ -97,20 +97,23 @@ export const GoogleDriveImportModal: React.FC<Props> = ({
               (앱을 통해 Export한 파일만 표시됩니다)
             </div>
           ) : (
-            files.map(file => (
-              <button
-                key={file.id}
-                onClick={() => handleFileClick(file)}
-                className="w-full text-left bg-black/40 border border-zinc-800 hover:border-blue-400/50 p-4 rounded-2xl transition-all group"
-              >
-                <div className="font-bold text-zinc-200 group-hover:text-blue-400 transition-colors break-words">
-                  {file.name}
-                </div>
-                <div className="text-xs text-zinc-500 mt-1 font-mono">
-                  {new Date(file.modifiedTime).toLocaleString()}
-                </div>
-              </button>
-            ))
+            files.map(file => {
+              const d = new Date(file.modifiedTime);
+              return (
+                <button
+                  key={file.id}
+                  onClick={() => handleFileClick(file)}
+                  className="w-full flex items-center justify-between bg-black/40 border border-zinc-800 hover:border-blue-400/50 py-2.5 px-3 rounded-xl transition-all group gap-3"
+                >
+                  <div className="text-sm font-sans font-medium text-zinc-200 group-hover:text-blue-400 transition-colors truncate text-left">
+                    {file.name}
+                  </div>
+                  <div className="text-[10px] text-zinc-500 shrink-0">
+                    {d.toLocaleDateString()} {d.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                  </div>
+                </button>
+              );
+            })
           )}
         </div>
 
