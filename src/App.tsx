@@ -588,7 +588,7 @@ export default function App() {
   );
   const [isEditingPrompt, setIsEditingPrompt] = useState(false);
   const [delayDuration, setDelayDuration] = useState(1.0);
-  const [delayMode, setDelayMode] = useState<0 | 1 | 2>(2);
+  const [delayMode, setDelayMode] = useState<0 | 1 | 2>(1);
   const [fontSize, setFontSize] = useState(3);
   const [krFontSize, setKrFontSize] = useState(3);
   const [showSpeedControl, setShowSpeedControl] = useState(false);
