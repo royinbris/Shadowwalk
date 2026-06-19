@@ -101,15 +101,15 @@ export const SettingsModal = ({
             initial={{ scale: 0.9, opacity: 0, y: 30 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.9, opacity: 0, y: 30 }}
-            className="w-full max-w-lg bg-zinc-100 dark:bg-[#1a1c23] border border-zinc-300 dark:border-zinc-700/50 rounded-[32px] p-6 shadow-2xl space-y-6"
+            className="w-full max-w-lg bg-zinc-950 border border-zinc-700/50 rounded-[32px] p-6 shadow-2xl space-y-6"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-2">
-                <h3 className="text-sm font-black uppercase tracking-[0.2em] text-yellow-600 dark:text-yellow-500">Study Settings</h3>
+                <h3 className="text-sm font-black uppercase tracking-[0.2em] text-yellow-500">Study Settings</h3>
                 <button 
                   onClick={() => setShowGestureHelp(true)}
-                  className="p-1 text-zinc-500 hover:text-yellow-600 dark:hover:text-yellow-500 transition-colors"
+                  className="p-1 text-zinc-500 hover:text-yellow-500 transition-colors"
                   title="Gesture Guide"
                 >
                   <HelpCircle size={14} />
@@ -122,7 +122,7 @@ export const SettingsModal = ({
                   Guide
                 </button>
               </div>
-              <button onClick={onClose} className="text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-colors">
+              <button onClick={onClose} className="text-zinc-500 hover:text-white transition-colors">
                 <X size={20} />
               </button>
             </div>
@@ -217,7 +217,7 @@ export const SettingsModal = ({
                 </div>
 
                 {/* Right: Vertical Toggles */}
-                <div className="w-[96px] flex flex-col gap-1.5 pt-1 border-l border-zinc-300 dark:border-zinc-700/50 pl-2">
+                <div className="w-[96px] flex flex-col gap-1.5 pt-1 border-l border-zinc-700/50 pl-2">
                   <button 
                     onClick={() => {
                       const nextState = !isVideoOnly;
@@ -225,7 +225,7 @@ export const SettingsModal = ({
                       if (nextState) setIsSubtitleOnly(false);
                     }}
                     className={`h-9 flex items-center justify-center px-1 w-full rounded border transition-colors ${
-                      isVideoOnly ? 'bg-orange-500 border-orange-400 text-white font-black' : 'bg-transparent border-transparent text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-800'
+                      isVideoOnly ? 'bg-orange-500 border-orange-400 text-zinc-950 font-black' : 'bg-transparent border-transparent text-zinc-400 hover:bg-zinc-800'
                     }`}
                   >
                     <span className="text-[10px] whitespace-nowrap">영상전용</span>
@@ -241,7 +241,7 @@ export const SettingsModal = ({
                       }
                     }}
                     className={`h-9 flex items-center justify-center px-1 w-full rounded border transition-colors ${
-                      isSubtitleOnly ? 'bg-orange-500 border-orange-400 text-white font-black' : 'bg-transparent border-transparent text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-800'
+                      isSubtitleOnly ? 'bg-orange-500 border-orange-400 text-zinc-950 font-black' : 'bg-transparent border-transparent text-zinc-400 hover:bg-zinc-800'
                     }`}
                   >
                     <span className="text-[10px] whitespace-nowrap">자막전용</span>
@@ -249,7 +249,7 @@ export const SettingsModal = ({
                   <button 
                     onClick={() => setShowVideoControls(!showVideoControls)}
                     className={`h-9 flex items-center justify-center px-1 w-full rounded border transition-colors ${
-                      showVideoControls ? 'bg-orange-500 border-orange-400 text-white font-black' : 'bg-transparent border-transparent text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-800'
+                      showVideoControls ? 'bg-orange-500 border-orange-400 text-zinc-950 font-black' : 'bg-transparent border-transparent text-zinc-400 hover:bg-zinc-800'
                     }`}
                   >
                     <span className="text-[10px] whitespace-nowrap">터치조작</span>
@@ -257,7 +257,7 @@ export const SettingsModal = ({
                   <button 
                     onClick={() => setIsContinuous(!isContinuous)}
                     className={`h-9 flex items-center justify-center px-1 w-full rounded border transition-colors ${
-                      isContinuous ? 'bg-orange-500 border-orange-400 text-white font-black' : 'bg-transparent border-transparent text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-800'
+                      isContinuous ? 'bg-orange-500 border-orange-400 text-zinc-950 font-black' : 'bg-transparent border-transparent text-zinc-400 hover:bg-zinc-800'
                     }`}
                   >
                     <span className="text-[10px] whitespace-nowrap">연속재생</span>
@@ -269,12 +269,12 @@ export const SettingsModal = ({
                       delayMode === 2 ? 'bg-cyan-500 border-cyan-400 text-zinc-950 font-black' : 'bg-transparent border-transparent text-zinc-400 hover:bg-zinc-800'
                     }`}
                   >
-                    <span className="text-[10px]">대기시간</span>
+                    <span className="text-[10px] whitespace-nowrap">대기시간</span>
                   </button>
                   <button 
                     onClick={() => setIsAutoPause(!isAutoPause)}
                     className={`h-9 flex items-center justify-center px-1 w-full rounded border transition-colors ${
-                      isAutoPause ? 'bg-orange-500 border-orange-400 text-white font-black' : 'bg-transparent border-transparent text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-800'
+                      isAutoPause ? 'bg-orange-500 border-orange-400 text-zinc-950 font-black' : 'bg-transparent border-transparent text-zinc-400 hover:bg-zinc-800'
                     }`}
                   >
                     <span className="text-[10px] whitespace-nowrap">자동정지</span>
@@ -285,27 +285,26 @@ export const SettingsModal = ({
                       isAutoAdvanceLoop ? 'bg-orange-500 border-orange-400 text-zinc-950 font-black' : 'bg-transparent border-transparent text-zinc-400 hover:bg-zinc-800'
                     }`}
                   >
-                    <span className="text-[10px]">자동진행</span>
+                    <span className="text-[10px] whitespace-nowrap">자동진행</span>
                   </button>
                   <button 
                     onClick={() => {
                       if (!showSyncControls) setShowRecordingPanel(false);
                       setShowSyncControls(!showSyncControls);
-                      if (!showSyncControls) setShowRecordingPanel(false);
                     }}
                     className={`h-9 flex items-center justify-center px-1 w-full rounded border transition-colors ${
-                      showSyncControls ? 'bg-orange-500 border-orange-400 text-white font-black' : 'bg-transparent border-transparent text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-800'
+                      showSyncControls ? 'bg-orange-500 border-orange-400 text-zinc-950 font-black' : 'bg-transparent border-transparent text-zinc-400 hover:bg-zinc-800'
                     }`}
                   >
                     <span className="text-[10px] whitespace-nowrap">싱크패널</span>
                   </button>
                   <button 
                     onClick={() => {
-                      setShowRecordingPanel(!showRecordingPanel);
                       if (!showRecordingPanel) setShowSyncControls(false);
+                      setShowRecordingPanel(!showRecordingPanel);
                     }}
                     className={`h-9 flex items-center justify-center px-1 w-full rounded border transition-colors ${
-                      showRecordingPanel ? 'bg-orange-500 border-orange-400 text-white font-black' : 'bg-transparent border-transparent text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-800'
+                      showRecordingPanel ? 'bg-orange-500 border-orange-400 text-zinc-950 font-black' : 'bg-transparent border-transparent text-zinc-400 hover:bg-zinc-800'
                     }`}
                   >
                     <span className="text-[10px] whitespace-nowrap">녹음패널</span>
@@ -313,10 +312,10 @@ export const SettingsModal = ({
                 </div>
               </div>
 
-              <div className="flex gap-2">
+              <div className="flex bg-zinc-900 rounded-xl p-1 gap-1 border border-zinc-800/50 mt-2">
                 <button
                   onClick={() => setShowGestureHelp(true)}
-                  className="flex-1 px-4 py-2 bg-zinc-200 dark:bg-zinc-800 hover:bg-zinc-300 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white rounded-lg transition-colors flex items-center justify-center gap-1 border border-zinc-300 dark:border-zinc-700"
+                  className="flex-1 px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-400 hover:text-white rounded-lg transition-colors flex items-center justify-center gap-1 border border-zinc-700"
                   title="Gesture Guide"
                 >
                   <HelpCircle size={12} />
@@ -324,7 +323,7 @@ export const SettingsModal = ({
                 </button>
                 <button
                   onClick={() => setShowGuide(true)}
-                  className="flex-1 px-4 py-2 bg-zinc-200 dark:bg-zinc-800 hover:bg-zinc-300 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white rounded-lg transition-colors flex items-center justify-center gap-1 border border-zinc-300 dark:border-zinc-700"
+                  className="flex-1 px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-400 hover:text-white rounded-lg transition-colors flex items-center justify-center gap-1 border border-zinc-700"
                   title="Full Guide"
                 >
                   <BookOpen size={12} />
@@ -332,11 +331,11 @@ export const SettingsModal = ({
                 </button>
                 <button
                   onClick={() => setIsApiKeyModalOpen(true)}
-                  className="flex-1 px-4 py-2 bg-zinc-200 dark:bg-zinc-800 hover:bg-zinc-300 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white rounded-lg transition-colors flex items-center justify-center gap-1 border border-zinc-300 dark:border-zinc-700"
+                  className="flex-1 px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-400 hover:text-white rounded-lg transition-colors flex items-center justify-center gap-1 border border-zinc-700"
                   title="Configure API Keys"
                 >
                   <Key size={12} />
-                  <span className="text-[12px] font-black uppercase tracking-tighter text-center">API Keys</span>
+                  <span className="text-[12px] font-black uppercase tracking-tighter text-center">API Key Settings</span>
                 </button>
               </div>
 
@@ -344,12 +343,10 @@ export const SettingsModal = ({
             </div>
 
             {/* Footer Buttons */}
-            <div className="flex flex-col gap-2 mt-4 pt-4 border-t border-zinc-300 dark:border-zinc-700/50">
+            <div className="flex flex-col gap-2 mt-4 pt-4 border-t border-zinc-700/50">
               <button 
                 onClick={() => {
-                  setVideoScale(5);
                   setPlaybackRate(1.0);
-                  setSeekBackDuration(1.0);
                   setMaxLoops(5);
                   setDelayDuration(1.0);
                   setFontSize(3);
@@ -360,7 +357,7 @@ export const SettingsModal = ({
                   setIsVideoOnly(false);
                   playerRef.current?.setPlaybackRate(1.0);
                 }}
-                className="bg-zinc-200 dark:bg-zinc-800/80 hover:bg-zinc-300 dark:hover:bg-zinc-700 py-2 rounded-lg border border-zinc-300 dark:border-zinc-700 flex items-center justify-center gap-2 text-yellow-600 dark:text-yellow-500 active:scale-95 transition-all shadow-lg"
+                className="bg-zinc-800/80 hover:bg-zinc-700 py-2 rounded-lg border border-zinc-700 flex items-center justify-center gap-2 text-yellow-500 active:scale-95 transition-all shadow-lg"
               >
                 <RotateCcw size={14} />
                 <span className="text-[10px] font-black uppercase tracking-[0.2em]">Reset All Settings</span>
