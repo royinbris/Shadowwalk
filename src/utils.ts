@@ -191,6 +191,9 @@ export const exportToGoogleDrive = (project: Project, clientId: string) => {
         callback: (tokenResponse: any) => {
           if (tokenResponse && tokenResponse.access_token) {
             uploadFile(tokenResponse.access_token);
+          } else {
+            console.error("Token response:", tokenResponse);
+            alert("Google 권한 승인이 취소되었거나 오류가 발생했습니다.");
           }
         },
       });
@@ -202,25 +205,36 @@ export const exportToGoogleDrive = (project: Project, clientId: string) => {
   };
 
   const uploadFile = async (accessToken: string) => {
+    const boundary = '-------314159265358979323846';
+    const delimiter = "\r\n--" + boundary + "\r\n";
+    const close_delim = "\r\n--" + boundary + "--";
+
+    const contentType = 'application/json';
     const metadata = {
       name: fileName,
-      mimeType: 'application/json',
+      mimeType: contentType
     };
-    const form = new FormData();
-    form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
-    form.append('file', new Blob([content], { type: 'application/json' }));
+
+    const multipartRequestBody =
+      delimiter +
+      'Content-Type: application/json\r\n\r\n' +
+      JSON.stringify(metadata) +
+      delimiter +
+      'Content-Type: ' + contentType + '\r\n\r\n' +
+      content +
+      close_delim;
 
     try {
       const res = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
         method: 'POST',
         headers: {
-          Authorization: `Bearer ${accessToken}`,
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': `multipart/related; boundary=${boundary}`
         },
-        body: form,
+        body: multipartRequestBody,
       });
       if (res.ok) {
-        // Optionally show toast or alert
-        console.log("Successfully uploaded to Google Drive");
+        alert(`Google Drive에 성공적으로 저장되었습니다!\n파일 이름: ${fileName}`);
       } else {
         const err = await res.text();
         console.error("Failed to upload to Google Drive", err);
