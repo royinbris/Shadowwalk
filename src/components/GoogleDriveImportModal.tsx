@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { fetchGoogleDriveFiles, downloadGoogleDriveFile } from '../utils';
+import { fetchGoogleDriveFiles, downloadGoogleDriveFile, getGoogleToken } from '../utils';
 
 interface DriveFile {
   id: string;
@@ -33,37 +33,19 @@ export const GoogleDriveImportModal: React.FC<Props> = ({
     }
   }, [isOpen, googleClientId]);
 
-  const loadFiles = () => {
+  const loadFiles = async () => {
     setIsLoading(true);
     setError(null);
 
     try {
-      const client = (window as any).google.accounts.oauth2.initTokenClient({
-        client_id: googleClientId,
-        scope: 'https://www.googleapis.com/auth/drive.file',
-        callback: async (tokenResponse: any) => {
-          if (tokenResponse && tokenResponse.access_token) {
-            try {
-              const fetchedFiles = await fetchGoogleDriveFiles(tokenResponse.access_token);
-              setFiles(fetchedFiles);
-              // Save token temporarily for download
-              (window as any)._driveToken = tokenResponse.access_token;
-            } catch (err) {
-              console.error(err);
-              setError("파일 목록을 불러오는 중 오류가 발생했습니다.");
-            } finally {
-              setIsLoading(false);
-            }
-          } else {
-            setError("Google 권한 승인이 취소되었거나 오류가 발생했습니다.");
-            setIsLoading(false);
-          }
-        },
-      });
-      client.requestAccessToken();
+      const accessToken = await getGoogleToken(googleClientId);
+      const fetchedFiles = await fetchGoogleDriveFiles(accessToken);
+      setFiles(fetchedFiles);
+      (window as any)._driveToken = accessToken;
     } catch (err) {
       console.error(err);
-      setError("Google Drive 인증 창을 띄우지 못했습니다. Client ID를 확인해주세요.");
+      setError("파일 목록을 불러오거나 인증하는 중 오류가 발생했습니다.");
+    } finally {
       setIsLoading(false);
     }
   };

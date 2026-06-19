@@ -177,7 +177,38 @@ export const preprocessSrt = (text: string): string => {
   return resultLines.join("\n");
 };
 
-export const exportToGoogleDrive = (project: Project, clientId: string) => {
+let cachedDriveToken: string | null = null;
+let tokenExpiresAt: number = 0;
+
+export const getGoogleToken = (clientId: string): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    if (cachedDriveToken && Date.now() < tokenExpiresAt - 60000) {
+      return resolve(cachedDriveToken);
+    }
+    
+    try {
+      const client = (window as any).google.accounts.oauth2.initTokenClient({
+        client_id: clientId,
+        scope: 'https://www.googleapis.com/auth/drive.file',
+        callback: (tokenResponse: any) => {
+          if (tokenResponse && tokenResponse.access_token) {
+            cachedDriveToken = tokenResponse.access_token;
+            const expiresIn = tokenResponse.expires_in ? parseInt(tokenResponse.expires_in, 10) : 3599;
+            tokenExpiresAt = Date.now() + expiresIn * 1000;
+            resolve(tokenResponse.access_token);
+          } else {
+            reject(new Error("Token response invalid"));
+          }
+        },
+      });
+      client.requestAccessToken();
+    } catch (err) {
+      reject(err);
+    }
+  });
+};
+
+export const exportToGoogleDrive = async (project: Project, clientId: string) => {
   if (!clientId || typeof window === 'undefined') return;
 
   const fileName = `${project.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.json`;
@@ -208,33 +239,6 @@ export const exportToGoogleDrive = (project: Project, clientId: string) => {
     });
     const createData = await createRes.json();
     return createData.id;
-  };
-
-  const initClient = () => {
-    try {
-      const client = (window as any).google.accounts.oauth2.initTokenClient({
-        client_id: clientId,
-        scope: 'https://www.googleapis.com/auth/drive.file',
-        callback: async (tokenResponse: any) => {
-          if (tokenResponse && tokenResponse.access_token) {
-            try {
-              const folderId = await getOrCreateDriveFolder(tokenResponse.access_token);
-              await uploadFile(tokenResponse.access_token, folderId);
-            } catch (err) {
-              console.error("Folder creation or upload failed", err);
-              alert("Google Drive 폴더 생성 또는 파일 업로드에 실패했습니다.");
-            }
-          } else {
-            console.error("Token response:", tokenResponse);
-            alert("Google 권한 승인이 취소되었거나 오류가 발생했습니다.");
-          }
-        },
-      });
-      client.requestAccessToken();
-    } catch (err) {
-      console.error("Failed to init Google Token Client", err);
-      alert("Google Drive 인증 창을 띄우지 못했습니다. Client ID를 확인해주세요.");
-    }
   };
 
   const uploadFile = async (accessToken: string, folderId: string) => {
@@ -281,7 +285,14 @@ export const exportToGoogleDrive = (project: Project, clientId: string) => {
   };
 
   if ((window as any).google && (window as any).google.accounts && (window as any).google.accounts.oauth2) {
-    initClient();
+    try {
+      const accessToken = await getGoogleToken(clientId);
+      const folderId = await getOrCreateDriveFolder(accessToken);
+      await uploadFile(accessToken, folderId);
+    } catch (err) {
+      console.error("Failed to get token or export to Google Drive", err);
+      alert("Google Drive 인증 오류 또는 업로드 실패가 발생했습니다. Client ID를 확인해주세요.");
+    }
   } else {
     alert("Google Identity Services 로딩 중입니다. 잠시 후 다시 시도해주세요.");
   }
