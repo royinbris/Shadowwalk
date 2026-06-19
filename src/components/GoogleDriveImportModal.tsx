@@ -69,8 +69,8 @@ export const GoogleDriveImportModal: React.FC<Props> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-      <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-6 w-full max-w-md max-h-[80vh] flex flex-col shadow-2xl">
-        <div className="flex justify-between items-center mb-6">
+      <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-4 w-full max-w-md max-h-[80vh] flex flex-col shadow-2xl">
+        <div className="flex justify-between items-center mb-3">
           <h2 className="text-xl font-black uppercase tracking-tighter text-blue-400">
             구글 드라이브에서 불러오기
           </h2>
@@ -88,7 +88,7 @@ export const GoogleDriveImportModal: React.FC<Props> = ({
           </div>
         )}
 
-        <div className="flex-1 overflow-y-auto pr-2 space-y-2">
+        <div className="flex-1 overflow-y-auto pr-2 space-y-1.5">
           {isLoading ? (
             <div className="text-center text-zinc-500 py-8 font-bold">로딩 중...</div>
           ) : files.length === 0 && !error ? (
@@ -99,17 +99,18 @@ export const GoogleDriveImportModal: React.FC<Props> = ({
           ) : (
             files.map(file => {
               const d = new Date(file.modifiedTime);
+              const dateStr = `${d.getMonth() + 1}.${d.getDate()}`;
               return (
                 <button
                   key={file.id}
                   onClick={() => handleFileClick(file)}
-                  className="w-full flex items-center justify-between bg-black/40 border border-zinc-800 hover:border-blue-400/50 py-2.5 px-3 rounded-xl transition-all group gap-3"
+                  className="w-full flex items-center justify-between bg-black/40 border border-zinc-800 hover:border-blue-400/50 py-2 px-2.5 rounded-xl transition-all group gap-2"
                 >
-                  <div className="text-sm font-sans font-medium text-zinc-200 group-hover:text-blue-400 transition-colors truncate text-left">
+                  <div className="text-sm font-sans font-medium text-zinc-200 group-hover:text-blue-400 transition-colors line-clamp-2 text-left flex-1 break-words">
                     {file.name}
                   </div>
                   <div className="text-[10px] text-zinc-500 shrink-0">
-                    {d.toLocaleDateString()} {d.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                    {dateStr}
                   </div>
                 </button>
               );
