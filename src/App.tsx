@@ -788,11 +788,51 @@ export default function App() {
           localFileName: mediaFile.name,
         };
       } else {
+        const processedInput = preprocessSrt(textContent);
+        const lines = processedInput.split("\n");
+        const transcriptItems: TranscriptItem[] = [];
+        let currentItem: TranscriptItem | null = null;
+        
+        lines.forEach((line) => {
+          const trimmedLine = line.trim();
+          if (!trimmedLine) return;
+          const timeMatch = trimmedLine.match(/^[(\[](\d+:?\d*:?[\d\.]*)[)\]]\s*(.*)$/);
+          if (timeMatch) {
+            const timeStr = timeMatch[1];
+            const text = timeMatch[2].trim();
+            const parts = timeStr.split(":").map(Number);
+            let seconds = 0;
+            if (parts.length === 3) seconds = parts[0] * 3600 + parts[1] * 60 + parts[2];
+            else if (parts.length === 2) seconds = parts[0] * 60 + parts[1];
+            else seconds = parts[0];
+            
+            currentItem = { text, offset: seconds, duration: 0 };
+            transcriptItems.push(currentItem);
+          } else {
+            const isTitleLine = trimmedLine.toLowerCase().startsWith("title:");
+            const isUrlLine = trimmedLine.toLowerCase().startsWith("url:");
+            if (currentItem && !isTitleLine && !isUrlLine) {
+              if (!currentItem.translation) currentItem.translation = trimmedLine;
+              else if (!currentItem.grammar) currentItem.grammar = trimmedLine;
+              else currentItem.grammar += "\n" + trimmedLine;
+            }
+          }
+        });
+
+        if (transcriptItems.length > 0) {
+          for (let i = 0; i < transcriptItems.length; i++) {
+            const nextOffset = transcriptItems[i + 1]?.offset || transcriptItems[i].offset + 5;
+            transcriptItems[i].duration = Math.max(0.1, nextOffset - transcriptItems[i].offset);
+          }
+        } else {
+          transcriptItems.push({ text: textContent, offset: 0, duration: 999999 });
+        }
+
         newProject = {
           id: Date.now().toString(),
           title: baseName,
           videoId: "local",
-          transcript: [],
+          transcript: transcriptItems,
           createdAt: Date.now(),
           isVideoLocal: true,
           localFileName: mediaFile.name,
@@ -808,11 +848,10 @@ export default function App() {
         return next;
       });
 
-      loadProject(newProject);
+      loadProject(newProject, url, mediaFile);
       
       if (!isJson) {
-        setUnifiedInput(`Title: ${baseName}\nURL: local\n\n${textContent}`);
-        setView("editor");
+        setUnifiedInput(`Title: ${baseName}\nURL: 로컬음원\n\n${textContent}`);
       }
 
     } catch (err) {
@@ -840,10 +879,13 @@ export default function App() {
     openEditor();
   };
 
-  const loadProject = (project: Project) => {
+  const loadProject = (project: Project, overrideVideoUrl?: string, overrideVideoFile?: File) => {
+    const currentVideoUrl = overrideVideoUrl || localVideoUrl;
+    const currentVideoFile = overrideVideoFile || localVideoFile;
+
     // If it's a local video, check if we still have the Blob URL or if it's expired
-    if (project.isVideoLocal && !localVideoUrl) {
-      if (localVideoFile && localVideoFile.name === project.localFileName) {
+    if (project.isVideoLocal && !currentVideoUrl) {
+      if (currentVideoFile && currentVideoFile.name === project.localFileName) {
         // Reuse current (though localVideoUrl should have been set if file is present)
       } else {
         setError(

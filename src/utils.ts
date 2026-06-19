@@ -34,7 +34,8 @@ export const formatTranscriptToUnified = (project: Project) => {
     })
     .join('\n\n');
   
-  return `Title: ${project.title}\nURL: https://www.youtube.com/watch?v=${project.videoId}\n\n${transcriptStr}`;
+  const urlLine = project.isVideoLocal ? `URL: 로컬음원` : `URL: https://www.youtube.com/watch?v=${project.videoId}`;
+  return `Title: ${project.title}\n${urlLine}\n\n${transcriptStr}`;
 };
 
 export const exportProject = async (project: Project) => {
