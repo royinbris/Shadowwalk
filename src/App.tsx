@@ -701,8 +701,13 @@ export default function App() {
 
   // Save projects to localStorage
   const saveProjectsToStorage = (updatedProjects: Project[]) => {
-    localStorage.setItem("shadowing_projects", JSON.stringify(updatedProjects));
-    setProjects(updatedProjects);
+    try {
+      localStorage.setItem("shadowing_projects", JSON.stringify(updatedProjects));
+      setProjects(updatedProjects);
+    } catch (e) {
+      console.error("Storage error:", e);
+      alert("디바이스 저장 공간이 가득 찼거나 오류가 발생했습니다. 브라우저 캐시를 삭제해 보세요.");
+    }
   };
 
   const handleFileImport = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -894,7 +899,11 @@ export default function App() {
     if (!videoIdToUse) videoIdToUse = currentProject?.videoId || "";
 
     if (!videoIdToUse) {
-      if (!silentSave) setError("Could not find a valid YouTube URL.");
+      const msg = "저장 실패: 유튜브 URL을 찾을 수 없습니다. (예: URL: https://youtube.com/watch?v=...)";
+      if (!silentSave) {
+        setError(msg);
+        alert(msg);
+      }
       return null;
     }
 
@@ -947,7 +956,11 @@ export default function App() {
     });
 
     if (transcriptItems.length === 0) {
-      if (!silentSave) setError("No valid transcript lines found.");
+      const msg = "저장 실패: 올바른 시간 양식을 찾을 수 없습니다. (예: (0:00) 안녕)";
+      if (!silentSave) {
+        setError(msg);
+        alert(msg);
+      }
       return null;
     }
 
