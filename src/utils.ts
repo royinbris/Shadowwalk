@@ -210,6 +210,35 @@ export const getGoogleToken = (): Promise<string> => {
   });
 };
 
+const showToast = (message: string) => {
+  const toast = document.createElement('div');
+  toast.textContent = message;
+  toast.style.position = 'fixed';
+  toast.style.bottom = '40px';
+  toast.style.left = '50%';
+  toast.style.transform = 'translateX(-50%)';
+  toast.style.backgroundColor = 'rgba(0, 0, 0, 0.85)';
+  toast.style.color = '#fff';
+  toast.style.padding = '12px 24px';
+  toast.style.borderRadius = '24px';
+  toast.style.zIndex = '9999';
+  toast.style.fontSize = '14px';
+  toast.style.fontWeight = 'bold';
+  toast.style.transition = 'opacity 0.3s ease';
+  toast.style.pointerEvents = 'none';
+
+  document.body.appendChild(toast);
+
+  setTimeout(() => {
+    toast.style.opacity = '0';
+    setTimeout(() => {
+      if (document.body.contains(toast)) {
+        document.body.removeChild(toast);
+      }
+    }, 300);
+  }, 1000);
+};
+
 export const exportToGoogleDrive = async (project: Project) => {
   if (typeof window === 'undefined') return;
 
@@ -248,34 +277,47 @@ export const exportToGoogleDrive = async (project: Project) => {
 
   const uploadFile = async (accessToken: string, folderId: string) => {
     const contentType = 'application/json';
-    const metadata = {
-      name: fileName,
-      mimeType: contentType,
-      parents: [folderId]
-    };
 
     try {
-      // Step 1: Create file metadata
-      const metaRes = await fetch('https://www.googleapis.com/drive/v3/files', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${accessToken}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(metadata)
+      // Check if file already exists
+      const query = `name='${fileName}' and '${folderId}' in parents and trashed=false`;
+      const searchRes = await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(query)}&fields=files(id)`, {
+        headers: { 'Authorization': `Bearer ${accessToken}` }
       });
+      const searchData = await searchRes.json();
+      
+      let fileId;
+      if (searchData.files && searchData.files.length > 0) {
+        // Overwrite existing file
+        fileId = searchData.files[0].id;
+      } else {
+        // Create new file metadata
+        const metadata = {
+          name: fileName,
+          mimeType: contentType,
+          parents: [folderId]
+        };
+        const metaRes = await fetch('https://www.googleapis.com/drive/v3/files', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${accessToken}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(metadata)
+        });
 
-      if (!metaRes.ok) {
-        const err = await metaRes.text();
-        console.error("Failed to create file metadata", err);
-        alert("파일 생성에 실패했습니다 (메타데이터 오류).");
-        return;
+        if (!metaRes.ok) {
+          const err = await metaRes.text();
+          console.error("Failed to create file metadata", err);
+          alert("파일 생성에 실패했습니다 (메타데이터 오류).");
+          return;
+        }
+
+        const fileData = await metaRes.json();
+        fileId = fileData.id;
       }
 
-      const fileData = await metaRes.json();
-      const fileId = fileData.id;
-
-      // Step 2: Upload actual content
+      // Upload actual content
       const uploadRes = await fetch(`https://www.googleapis.com/upload/drive/v3/files/${fileId}?uploadType=media`, {
         method: 'PATCH',
         headers: {
@@ -286,7 +328,7 @@ export const exportToGoogleDrive = async (project: Project) => {
       });
 
       if (uploadRes.ok) {
-        alert(`Google Drive '${FOLDER_NAME}' 폴더에 성공적으로 저장되었습니다!\\n파일 이름: ${fileName}`);
+        showToast("구글 드라이브에 저장되었습니다!");
       } else {
         const err = await uploadRes.text();
         console.error("Failed to upload to Google Drive", err);
