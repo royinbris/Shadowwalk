@@ -58,19 +58,17 @@ export const LibraryView = ({
               className="hidden" 
               accept=".json"
             />
-            {/* 
-            <label className="cursor-pointer flex items-center bg-zinc-800 hover:bg-zinc-700 px-4 py-2 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all text-zinc-400 gap-2 border border-zinc-700">
-              <Upload size={12} className="text-yellow-500" />
-              Local MP4+JSON
+            <label className="cursor-pointer flex items-center bg-zinc-800 hover:bg-zinc-700 px-3 py-2 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all text-zinc-300 gap-1.5 border border-zinc-700">
+              <Upload size={14} className="text-yellow-500" />
+              음원+TXT
               <input 
                 type="file" 
-                accept=".mp4,.json" 
+                accept="audio/*,video/*,.mp4,.mp3,.m4a,.json,.txt,.srt" 
                 multiple 
                 className="hidden" 
                 onChange={handleLocalFileSelection}
               />
             </label>
-            */}
             <button 
               onClick={startNewProject}
               className="flex items-center gap-1.5 bg-zinc-800 hover:bg-zinc-700 px-3 py-2 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all text-zinc-300 border border-zinc-700"

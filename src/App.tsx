@@ -741,17 +741,24 @@ export default function App() {
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
-    let mp4File: File | null = null;
-    let jsonFile: File | null = null;
+    let mediaFile: File | null = null;
+    let textFile: File | null = null;
 
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
-      if (file.name.toLowerCase().endsWith(".mp4")) mp4File = file;
-      if (file.name.toLowerCase().endsWith(".json")) jsonFile = file;
+      const name = file.name.toLowerCase();
+      if (name.endsWith(".mp4") || name.endsWith(".mp3") || name.endsWith(".m4a") || file.type.startsWith("audio/") || file.type.startsWith("video/")) {
+        mediaFile = file;
+      }
+      if (name.endsWith(".json") || name.endsWith(".txt") || name.endsWith(".srt")) {
+        textFile = file;
+      }
     }
 
-    if (!mp4File || !jsonFile) {
-      setError("Please select both an .mp4 file and a .json subtitle file.");
+    if (!mediaFile || !textFile) {
+      setError("음원/영상 파일과 텍스트(.txt, .srt, .json) 파일을 함께 선택해주세요.");
+      // Reset input
+      e.target.value = "";
       return;
     }
 
@@ -759,28 +766,41 @@ export default function App() {
       setIsLoading(true);
       setError(null);
 
-      const jsonText = await jsonFile.text();
-      const jsonData = JSON.parse(jsonText);
+      const textContent = await textFile.text();
+      const isJson = textFile.name.toLowerCase().endsWith(".json");
+      const url = URL.createObjectURL(mediaFile);
+      const baseName = mediaFile.name.replace(/\.[^/.]+$/, "");
 
-      if (!jsonData.transcript || !Array.isArray(jsonData.transcript)) {
-        throw new Error("Invalid JSON format. Expected { transcript: [...] }");
+      let newProject: Project;
+
+      if (isJson) {
+        const jsonData = JSON.parse(textContent);
+        if (!jsonData.transcript || !Array.isArray(jsonData.transcript)) {
+          throw new Error("Invalid JSON format. Expected { transcript: [...] }");
+        }
+        newProject = {
+          id: Date.now().toString(),
+          title: jsonData.title || baseName,
+          videoId: "local",
+          transcript: jsonData.transcript,
+          createdAt: Date.now(),
+          isVideoLocal: true,
+          localFileName: mediaFile.name,
+        };
+      } else {
+        newProject = {
+          id: Date.now().toString(),
+          title: baseName,
+          videoId: "local",
+          transcript: [],
+          createdAt: Date.now(),
+          isVideoLocal: true,
+          localFileName: mediaFile.name,
+        };
       }
 
-      const url = URL.createObjectURL(mp4File);
       setLocalVideoUrl(url);
-      setLocalVideoFile(mp4File);
-
-      const baseName = mp4File.name.replace(/\.[^/.]+$/, "");
-
-      const newProject: Project = {
-        id: Date.now().toString(),
-        title: jsonData.title || baseName,
-        videoId: "local",
-        transcript: jsonData.transcript,
-        createdAt: Date.now(),
-        isVideoLocal: true,
-        localFileName: mp4File.name,
-      };
+      setLocalVideoFile(mediaFile);
 
       setProjects((prev) => {
         const next = [newProject, ...prev];
@@ -789,6 +809,12 @@ export default function App() {
       });
 
       loadProject(newProject);
+      
+      if (!isJson) {
+        setUnifiedInput(`Title: ${baseName}\nURL: local\n\n${textContent}`);
+        setView("editor");
+      }
+
     } catch (err) {
       console.error(err);
       setError(
@@ -797,6 +823,8 @@ export default function App() {
       );
     } finally {
       setIsLoading(false);
+      // Reset input
+      e.target.value = "";
     }
   };
 
