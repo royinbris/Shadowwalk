@@ -4539,8 +4539,6 @@ ${actualQuery}`;
             setCerebrasModel={setCerebrasModel}
             openrouterApiKey={openrouterApiKey}
             setOpenrouterApiKey={setOpenrouterApiKey}
-            googleClientId={googleClientId}
-            setGoogleClientId={setGoogleClientId}
             openrouterModel={openrouterModel}
             setOpenrouterModel={setOpenrouterModel}
             isApiKeyVisible={isApiKeyVisible}
