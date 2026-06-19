@@ -842,11 +842,12 @@ export default function App() {
     setRightView("subtitles");
   };
 
-  const saveProject = () => {
-    if (!unifiedInput.trim()) return;
-    setError(null);
+  const saveProject = (silentSave: boolean = false, textInput?: string): Project | null | void => {
+    const inputToUse = textInput !== undefined ? textInput : unifiedInput;
+    if (!inputToUse.trim()) return null;
+    if (!silentSave) setError(null);
 
-    const processedInput = preprocessSrt(unifiedInput);
+    const processedInput = preprocessSrt(inputToUse);
     const lines = processedInput.split("\n");
     let title = "";
     let url = "";
@@ -893,8 +894,8 @@ export default function App() {
     if (!videoIdToUse) videoIdToUse = currentProject?.videoId || "";
 
     if (!videoIdToUse) {
-      setError("Could not find a valid YouTube URL.");
-      return;
+      if (!silentSave) setError("Could not find a valid YouTube URL.");
+      return null;
     }
 
     const transcriptItems: TranscriptItem[] = [];
@@ -946,8 +947,8 @@ export default function App() {
     });
 
     if (transcriptItems.length === 0) {
-      setError("No valid transcript lines found.");
-      return;
+      if (!silentSave) setError("No valid transcript lines found.");
+      return null;
     }
 
     // Calculate durations
@@ -974,12 +975,17 @@ export default function App() {
 
     saveProjectsToStorage(updatedProjects);
     setCurrentProject(updatedProject);
-    setVideoId(updatedProject.videoId);
-    setTranscript(updatedProject.transcript);
-    setShowEn(true);
-    setShowKo(true);
-    setShowGrammar(true);
-    setView("study");
+    
+    if (!silentSave) {
+      setVideoId(updatedProject.videoId);
+      setTranscript(updatedProject.transcript);
+      setShowEn(true);
+      setShowKo(true);
+      setShowGrammar(true);
+      setView("study");
+    }
+    
+    return updatedProject;
   };
 
   const deleteProject = (id: string) => {

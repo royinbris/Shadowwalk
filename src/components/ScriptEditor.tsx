@@ -14,7 +14,7 @@ interface ScriptEditorProps {
   setView: (view: 'library' | 'study' | 'editor') => void;
   currentProject: Project | null;
   exportProject: (project: Project) => void;
-  saveProject: () => void;
+  saveProject: (silentSave?: boolean, textInput?: string) => Project | null | void;
   error: string | null;
 }
 
@@ -46,7 +46,9 @@ export const ScriptEditor = ({
     reader.onload = (event) => {
       const text = event.target?.result as string;
       if (text) {
-        setUnifiedInput(unifiedInput ? unifiedInput + '\n\n' + text : text);
+        const newText = unifiedInput ? unifiedInput + '\n\n' + text : text;
+        setUnifiedInput(newText);
+        saveProject(true, newText);
       }
     };
     reader.readAsText(file);
@@ -276,12 +278,14 @@ export const ScriptEditor = ({
                   onClick={() => setView(currentProject ? 'study' : 'library')}
                   className="bg-zinc-900 hover:bg-zinc-800 px-2.5 py-1.5 rounded-lg text-[9px] font-bold uppercase tracking-wider transition-all text-zinc-400 border border-zinc-800 active:scale-95"
                 >
-                  Cancel
+                  뒤로가기
                 </button>
                 <button 
                   onClick={() => {
-                    if (currentProject) exportProject(currentProject);
-                    else alert("저장 후 내보낼 수 있습니다.");
+                    const saved = saveProject(true);
+                    if (saved) exportProject(saved);
+                    else if (currentProject) exportProject(currentProject);
+                    else alert("저장 가능한 스크립트가 없습니다. 먼저 작성해 주세요.");
                   }}
                   className="bg-zinc-800 hover:bg-zinc-700 px-2.5 py-1.5 rounded-lg text-[9px] font-bold uppercase tracking-wider transition-all text-zinc-300 border border-zinc-700 active:scale-95"
                 >
