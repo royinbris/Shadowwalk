@@ -57,7 +57,7 @@ export const VerticalDial = ({
   return (
     <div className="flex flex-col items-center gap-1.5">
       <div className="flex flex-col items-center mb-1">
-        <div className="font-mono text-[10px] uppercase tracking-tighter text-white font-black mb-1 bg-zinc-800 px-1.5 py-0.5 rounded border border-zinc-700 shadow-md text-center leading-tight">
+        <div className="font-mono text-[10px] uppercase tracking-tighter text-zinc-800 dark:text-white font-black mb-1 bg-zinc-200 dark:bg-zinc-800 px-1.5 py-0.5 rounded border border-zinc-300 dark:border-zinc-700 shadow-sm dark:shadow-md text-center leading-tight">
           {label.split(' ').map((line, i) => <span key={i} className="block">{line}</span>)}
         </div>
         <div className="flex flex-col items-center mt-1">
@@ -76,13 +76,13 @@ export const VerticalDial = ({
       <div className="flex flex-col items-center gap-1.5">
         <button 
           onPointerDown={() => onChange(Math.min(max, Number((value + step).toFixed(1))))}
-          className="w-9 h-9 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-500 hover:text-white active:scale-90 active:border-zinc-600 transition-all shadow-md"
+          className="w-9 h-9 rounded-full bg-zinc-200 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800 flex items-center justify-center text-zinc-600 dark:text-zinc-500 hover:text-zinc-900 dark:hover:text-white active:scale-90 active:border-zinc-400 dark:active:border-zinc-600 transition-all shadow-sm dark:shadow-md"
         >
           <Plus size={14} />
         </button>
 
         <div 
-          className="w-9 h-[180px] bg-[#0a0b0d] rounded-full border border-zinc-800/50 relative cursor-ns-resize shadow-[inset_0_2px_8px_rgba(0,0,0,0.8)] touch-none overflow-hidden"
+          className="w-9 h-[180px] bg-zinc-100 dark:bg-[#0a0b0d] rounded-full border border-zinc-300 dark:border-zinc-800/50 relative cursor-ns-resize shadow-[inset_0_2px_4px_rgba(0,0,0,0.1)] dark:shadow-[inset_0_2px_8px_rgba(0,0,0,0.8)] touch-none overflow-hidden"
           onWheel={(e) => {
             const direction = e.deltaY < 0 ? 1 : -1;
             onChange(Math.max(min, Math.min(max, Number((value + direction * step).toFixed(1)))));
@@ -109,7 +109,7 @@ export const VerticalDial = ({
             {[...Array(11)].map((_, i) => (
               <div 
                 key={i} 
-                className={`h-[1px] rounded-full ${i % 2 === 0 ? 'w-full bg-zinc-400' : 'w-1/2 mx-auto bg-zinc-600'}`} 
+                className={`h-[1px] rounded-full ${i % 2 === 0 ? 'w-full bg-zinc-600 dark:bg-zinc-400' : 'w-1/2 mx-auto bg-zinc-800 dark:bg-zinc-600'}`} 
               />
             ))}
           </div>
@@ -127,10 +127,10 @@ export const VerticalDial = ({
 
           {/* Thumb / Handle */}
           <motion.div 
-            className="absolute left-1/2 -translate-x-1/2 w-7 h-4 rounded-md border border-zinc-700 bg-gradient-to-br from-zinc-800 to-zinc-900 shadow-md flex items-center justify-center gap-0.5 z-10 pointer-events-none"
+            className="absolute left-1/2 -translate-x-1/2 w-7 h-4 rounded-md border border-zinc-400 dark:border-zinc-700 bg-gradient-to-br from-zinc-100 to-zinc-300 dark:from-zinc-800 dark:to-zinc-900 shadow-sm dark:shadow-md flex items-center justify-center gap-0.5 z-10 pointer-events-none"
             style={{
-              borderColor: isActive ? hex : '#3f3f46',
-              boxShadow: isActive ? `0 0 10px ${hex}4d` : 'none'
+              borderColor: isActive ? hex : '',
+              boxShadow: isActive ? `0 0 10px ${hex}4d` : ''
             }}
             animate={{ bottom: thumbBottom - 10 }}
             transition={{ type: "spring", stiffness: 300, damping: 30 }}
@@ -138,8 +138,8 @@ export const VerticalDial = ({
             {[...Array(3)].map((_, i) => (
               <div 
                 key={i} 
-                className="w-0.5 h-2 rounded-full transition-colors duration-300" 
-                style={{ backgroundColor: isActive ? hex : '#52525b' }}
+                className="w-0.5 h-2 rounded-full transition-colors duration-300 bg-zinc-400 dark:bg-[#52525b]" 
+                style={{ backgroundColor: isActive ? hex : '' }}
               />
             ))}
           </motion.div>
@@ -147,7 +147,7 @@ export const VerticalDial = ({
 
         <button 
           onPointerDown={() => onChange(Math.max(min, Number((value - step).toFixed(1))))}
-          className="w-9 h-9 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-500 hover:text-white active:scale-90 active:border-zinc-600 transition-all shadow-md"
+          className="w-9 h-9 rounded-full bg-zinc-200 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800 flex items-center justify-center text-zinc-600 dark:text-zinc-500 hover:text-zinc-900 dark:hover:text-white active:scale-90 active:border-zinc-400 dark:active:border-zinc-600 transition-all shadow-sm dark:shadow-md"
         >
           <Minus size={14} />
         </button>
