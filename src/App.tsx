@@ -166,9 +166,6 @@ export default function App() {
   const [openrouterModel, setOpenrouterModel] = useState(
     () => localStorage.getItem("user_openrouter_model") || "qwen/qwen-3-235b",
   );
-  const [googleClientId, setGoogleClientId] = useState(
-    () => localStorage.getItem("user_google_client_id") || "",
-  );
   const [aiProvider, setAiProvider] = useState<
     "gemini" | "cerebras" | "openrouter"
   >(
@@ -182,10 +179,8 @@ export default function App() {
 
   const handleExportProject = useCallback((project: Project) => {
     exportProject(project);
-    if (googleClientId) {
-      exportToGoogleDrive(project, googleClientId);
-    }
-  }, [googleClientId]);
+    exportToGoogleDrive(project);
+  }, []);
   const [isApiKeyModalOpen, setIsApiKeyModalOpen] = useState(false);
   const [isDriveImportModalOpen, setIsDriveImportModalOpen] = useState(false);
   const [isContinuous, setIsContinuous] = useState(true);
@@ -3099,14 +3094,7 @@ ${actualQuery}`;
                 handleLocalFileSelection={handleLocalFileSelection}
                 startNewProject={startNewProject}
                 openEditor={openEditor}
-                onOpenDriveImport={() => {
-                  if (!googleClientId) {
-                    alert("설정(API Key Settings)에서 Google Client ID를 먼저 입력해주세요.");
-                    setIsApiKeyModalOpen(true);
-                    return;
-                  }
-                  setIsDriveImportModalOpen(true);
-                }}
+                onOpenDriveImport={() => setIsDriveImportModalOpen(true)}
               />
             )}
 
@@ -4292,14 +4280,7 @@ ${actualQuery}`;
                       handleFileImport={handleFileImport}
                       handleLocalFileSelection={handleLocalFileSelection}
                       startNewProject={startNewProject}
-                      onOpenDriveImport={() => {
-                        if (!googleClientId) {
-                          alert("설정(API Key Settings)에서 Google Client ID를 먼저 입력해주세요.");
-                          setIsApiKeyModalOpen(true);
-                          return;
-                        }
-                        setIsDriveImportModalOpen(true);
-                      }}
+                      onOpenDriveImport={() => setIsDriveImportModalOpen(true)}
                     />
                   ) : rightView === "settings" ? (
                     <SettingsPanel
@@ -4533,7 +4514,6 @@ ${actualQuery}`;
           <GoogleDriveImportModal
             isOpen={isDriveImportModalOpen}
             onClose={() => setIsDriveImportModalOpen(false)}
-            googleClientId={googleClientId}
             onImport={(project) => {
               saveProject(project);
               loadProject(project);

@@ -10,14 +10,12 @@ interface DriveFile {
 interface Props {
   isOpen: boolean;
   onClose: () => void;
-  googleClientId: string;
   onImport: (projectData: any) => void;
 }
 
 export const GoogleDriveImportModal: React.FC<Props> = ({
   isOpen,
   onClose,
-  googleClientId,
   onImport,
 }) => {
   const [files, setFiles] = useState<DriveFile[]>([]);
@@ -25,20 +23,20 @@ export const GoogleDriveImportModal: React.FC<Props> = ({
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (isOpen && googleClientId) {
+    if (isOpen) {
       loadFiles();
-    } else if (!isOpen) {
+    } else {
       setFiles([]);
       setError(null);
     }
-  }, [isOpen, googleClientId]);
+  }, [isOpen]);
 
   const loadFiles = async () => {
     setIsLoading(true);
     setError(null);
 
     try {
-      const accessToken = await getGoogleToken(googleClientId);
+      const accessToken = await getGoogleToken();
       const fetchedFiles = await fetchGoogleDriveFiles(accessToken);
       setFiles(fetchedFiles);
       (window as any)._driveToken = accessToken;

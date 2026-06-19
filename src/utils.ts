@@ -180,7 +180,9 @@ export const preprocessSrt = (text: string): string => {
 let cachedDriveToken: string | null = null;
 let tokenExpiresAt: number = 0;
 
-export const getGoogleToken = (clientId: string): Promise<string> => {
+export const GOOGLE_CLIENT_ID = "1001560043137-ulb2h8a3ohati1nluq7brf94k560ugfe.apps.googleusercontent.com";
+
+export const getGoogleToken = (): Promise<string> => {
   return new Promise((resolve, reject) => {
     if (cachedDriveToken && Date.now() < tokenExpiresAt - 60000) {
       return resolve(cachedDriveToken);
@@ -188,7 +190,7 @@ export const getGoogleToken = (clientId: string): Promise<string> => {
     
     try {
       const client = (window as any).google.accounts.oauth2.initTokenClient({
-        client_id: clientId,
+        client_id: GOOGLE_CLIENT_ID,
         scope: 'https://www.googleapis.com/auth/drive.file',
         callback: (tokenResponse: any) => {
           if (tokenResponse && tokenResponse.access_token) {
@@ -208,8 +210,8 @@ export const getGoogleToken = (clientId: string): Promise<string> => {
   });
 };
 
-export const exportToGoogleDrive = async (project: Project, clientId: string) => {
-  if (!clientId || typeof window === 'undefined') return;
+export const exportToGoogleDrive = async (project: Project) => {
+  if (typeof window === 'undefined') return;
 
   const fileName = `${project.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.json`;
   const content = JSON.stringify(project, null, 2);
@@ -286,12 +288,12 @@ export const exportToGoogleDrive = async (project: Project, clientId: string) =>
 
   if ((window as any).google && (window as any).google.accounts && (window as any).google.accounts.oauth2) {
     try {
-      const accessToken = await getGoogleToken(clientId);
+      const accessToken = await getGoogleToken();
       const folderId = await getOrCreateDriveFolder(accessToken);
       await uploadFile(accessToken, folderId);
     } catch (err) {
       console.error("Failed to get token or export to Google Drive", err);
-      alert("Google Drive 인증 오류 또는 업로드 실패가 발생했습니다. Client ID를 확인해주세요.");
+      alert("Google Drive 인증 오류 또는 업로드 실패가 발생했습니다.");
     }
   } else {
     alert("Google Identity Services 로딩 중입니다. 잠시 후 다시 시도해주세요.");
