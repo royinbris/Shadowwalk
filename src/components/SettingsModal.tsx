@@ -1,8 +1,9 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { HelpCircle, X, RotateCcw, Key } from 'lucide-react';
+import { HelpCircle, X, RotateCcw, Key, BookOpen } from 'lucide-react';
 import { VerticalDial } from './VerticalDial';
 import { ThemeSelector } from './ThemeSelector';
+import { GuideModal } from './GuideModal';
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -83,9 +84,11 @@ export const SettingsModal = ({
   isAutoAdvanceLoop, setIsAutoAdvanceLoop,
   themeId, setThemeId
 }: SettingsModalProps) => {
+  const [showGuide, setShowGuide] = React.useState(false);
 
   return (
-    <AnimatePresence>
+    <>
+      <AnimatePresence>
       {isOpen && (
         <motion.div
           initial={{ opacity: 0 }}
@@ -110,6 +113,13 @@ export const SettingsModal = ({
                   title="Gesture Guide"
                 >
                   <HelpCircle size={14} />
+                </button>
+                <button 
+                  onClick={() => setShowGuide(true)}
+                  className="px-2 py-1 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 rounded-md text-[10px] font-bold tracking-widest uppercase transition-colors"
+                  title="Full Guide & Tips"
+                >
+                  Guide
                 </button>
               </div>
               <button onClick={onClose} className="text-zinc-500 hover:text-white transition-colors">
@@ -312,6 +322,14 @@ export const SettingsModal = ({
                   <span className="text-[12px] font-black uppercase tracking-tighter text-center">Gesture Guide</span>
                 </button>
                 <button
+                  onClick={() => setShowGuide(true)}
+                  className="flex-1 px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-400 hover:text-white rounded-lg transition-colors flex items-center justify-center gap-1 border border-zinc-700"
+                  title="Full Guide"
+                >
+                  <BookOpen size={12} />
+                  <span className="text-[12px] font-black uppercase tracking-tighter text-center">Full Guide</span>
+                </button>
+                <button
                   onClick={() => setIsApiKeyModalOpen(true)}
                   className="flex-1 px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-400 hover:text-white rounded-lg transition-colors flex items-center justify-center gap-1 border border-zinc-700"
                   title="Configure API Keys"
@@ -348,6 +366,8 @@ export const SettingsModal = ({
           </motion.div>
         </motion.div>
       )}
-    </AnimatePresence>
+      {showGuide && <GuideModal onClose={() => setShowGuide(false)} />}
+      </AnimatePresence>
+    </>
   );
 };

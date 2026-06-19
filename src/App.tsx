@@ -3389,7 +3389,11 @@ ${actualQuery}`;
                               exit={{ opacity: 0, scale: 1.02 }}
                               className="w-full space-y-0.5 pointer-events-auto"
                               ref={captionAreaRef}
-                              onPointerDown={() => {
+                              onPointerDown={(e) => {
+                                const rect = e.currentTarget.getBoundingClientRect();
+                                const x = e.clientX - rect.left;
+                                if (x < 50 || x > rect.width - 50) return;
+
                                 window.speechSynthesis.cancel();
                                 let wasPlaying = false;
                                 if (currentProject?.isVideoLocal && videoRef.current) {
@@ -3434,6 +3438,10 @@ ${actualQuery}`;
                                   const rect =
                                     captionAreaRef.current.getBoundingClientRect();
                                   const x = info.point.x - rect.left;
+                                  
+                                  // 50px 좌우 데드존 (오터치 방지)
+                                  if (x < 50 || x > rect.width - 50) return;
+                                  
                                   const ratio = x / rect.width;
                                   const handleAction = (count: number) => {
                                     if (count === 3) {
