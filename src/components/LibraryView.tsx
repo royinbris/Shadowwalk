@@ -50,6 +50,7 @@ export const LibraryView = ({
               className="hidden" 
               accept=".json"
             />
+            {/* 
             <label className="cursor-pointer flex items-center bg-zinc-800 hover:bg-zinc-700 px-4 py-2 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all text-zinc-400 gap-2 border border-zinc-700">
               <Upload size={12} className="text-yellow-500" />
               Local MP4+JSON
@@ -61,6 +62,7 @@ export const LibraryView = ({
                 onChange={handleLocalFileSelection}
               />
             </label>
+            */}
             <button 
               onClick={startNewProject}
               className="flex items-center gap-2 bg-zinc-800 hover:bg-zinc-700 px-4 py-2 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all text-zinc-400 border border-zinc-700"
@@ -68,6 +70,7 @@ export const LibraryView = ({
               <Plus className="w-3 h-3" />
               New Script
             </button>
+            {/*
             <button 
               onClick={() => fileInputRef.current?.click()}
               className="flex items-center gap-2 bg-zinc-800 hover:bg-zinc-700 px-4 py-2 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all text-zinc-400"
@@ -75,6 +78,7 @@ export const LibraryView = ({
               <Download className="w-3 h-3" />
               Import File
             </button>
+            */}
             <button 
               onClick={onOpenDriveImport}
               className="flex items-center gap-2 bg-blue-900/30 hover:bg-blue-800/50 px-4 py-2 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all text-blue-400 border border-blue-900/50"

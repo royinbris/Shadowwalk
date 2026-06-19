@@ -178,7 +178,7 @@ export default function App() {
   const [isApiKeyVisible, setIsApiKeyVisible] = useState(false);
 
   const handleExportProject = useCallback((project: Project) => {
-    exportProject(project);
+    // exportProject(project); // 로컬 저장 기능 중지 (향후 대비용으로 남겨둠)
     exportToGoogleDrive(project);
   }, []);
   const [isApiKeyModalOpen, setIsApiKeyModalOpen] = useState(false);
