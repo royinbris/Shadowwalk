@@ -184,6 +184,42 @@ let tokenExpiresAt: number = 0;
 
 export const GOOGLE_CLIENT_ID = "1001560043137-ulb2h8a3ohati1nluq7brf94k560ugfe.apps.googleusercontent.com";
 
+const DRIVE_SCOPE = 'https://www.googleapis.com/auth/drive';
+
+export const isIOSDevice = (): boolean =>
+  /iP(hone|ad|od)/.test(navigator.userAgent) ||
+  (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
+// iOS (esp. standalone PWA) blocks the GIS token popup, so use a full-page
+// redirect to Google's OAuth consent and read the token from the return hash.
+export const startGoogleRedirectAuth = () => {
+  const redirectUri = window.location.origin + window.location.pathname;
+  const params = new URLSearchParams({
+    client_id: GOOGLE_CLIENT_ID,
+    redirect_uri: redirectUri,
+    response_type: 'token',
+    scope: DRIVE_SCOPE,
+    include_granted_scopes: 'true',
+    state: 'drive_import',
+    prompt: 'consent',
+  });
+  window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`;
+};
+
+// Returns true if an access token was found in the URL hash after redirect.
+export const consumeGoogleRedirectToken = (): boolean => {
+  if (!window.location.hash) return false;
+  const hash = new URLSearchParams(window.location.hash.replace(/^#/, ''));
+  const token = hash.get('access_token');
+  if (!token || hash.get('state') !== 'drive_import') return false;
+  const expiresIn = parseInt(hash.get('expires_in') || '3599', 10);
+  cachedDriveToken = token;
+  tokenExpiresAt = Date.now() + expiresIn * 1000;
+  (window as any)._driveToken = token;
+  history.replaceState(null, '', window.location.pathname + window.location.search);
+  return true;
+};
+
 export const getGoogleToken = (): Promise<string> => {
   return new Promise((resolve, reject) => {
     if (cachedDriveToken && Date.now() < tokenExpiresAt - 60000) {

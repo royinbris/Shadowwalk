@@ -4,6 +4,8 @@ import {
   downloadGoogleDriveText,
   downloadGoogleDriveBlob,
   getGoogleToken,
+  isIOSDevice,
+  startGoogleRedirectAuth,
 } from '../utils';
 
 interface DriveFile {
@@ -59,6 +61,15 @@ export const GoogleDriveImportModal: React.FC<Props> = ({
       setAttempted(false);
     }
   }, [isOpen]);
+
+  const handleConnect = () => {
+    // iOS blocks the token popup; redirect the whole page to Google instead.
+    if (isIOSDevice() && !(window as any)._driveToken) {
+      startGoogleRedirectAuth();
+      return;
+    }
+    loadFiles();
+  };
 
   const loadFiles = async () => {
     setIsLoading(true);
@@ -173,7 +184,7 @@ export const GoogleDriveImportModal: React.FC<Props> = ({
           ) : !attempted || (error && files.length === 0) ? (
             <div className="flex flex-col items-center gap-3 py-8">
               <button
-                onClick={loadFiles}
+                onClick={handleConnect}
                 className="px-5 py-3 rounded-xl font-bold bg-blue-600 hover:bg-blue-500 text-white transition-colors"
               >
                 구글 드라이브 연결

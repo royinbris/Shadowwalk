@@ -23,6 +23,7 @@ import {
   printSubtitles,
   preprocessSrt,
   parseTranscriptText,
+  consumeGoogleRedirectToken,
 } from "./utils";
 import { RefinementPromptModal } from "./components/RefinementPromptModal";
 import { ProjectCard } from "./components/ProjectCard";
@@ -184,6 +185,14 @@ export default function App() {
   }, []);
   const [isApiKeyModalOpen, setIsApiKeyModalOpen] = useState(false);
   const [isDriveImportModalOpen, setIsDriveImportModalOpen] = useState(false);
+
+  useEffect(() => {
+    // Returning from the iOS Google OAuth redirect: pick up the token and reopen the picker.
+    if (consumeGoogleRedirectToken()) {
+      setIsDriveImportModalOpen(true);
+    }
+  }, []);
+
   const [isContinuous, setIsContinuous] = useState(true);
   const [isAutoAdvanceLoop, setIsAutoAdvanceLoop] = useState(true);
   const [isSubtitleOnly, setIsSubtitleOnly] = useState(false);
