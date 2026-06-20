@@ -1400,6 +1400,11 @@ export default function App() {
         if (currentSentence) {
           const endTime = currentSentence.offset + currentSentence.duration;
 
+          // Active per-sentence looping (finite loops remaining, or infinite loop mode)
+          const inPerSentenceLoop =
+            !isVideoOnly &&
+            ((loopMode === 1 && loopCount < maxLoops - 1) || loopMode === 2);
+
           // 1. Emergency Sync: If currentTime is off the current sentence, find the correct one
           if (!isSubtitleOnly) {
             if (expectedSeekTargetRef.current) {
@@ -1418,7 +1423,14 @@ export default function App() {
             const isWayOff =
               currentTime < currentSentence.offset - 0.5 ||
               currentTime > endTime + 0.5;
-            if (isWayOff && !isTransitioningRef.current) {
+            // A small forward overshoot while looping a sentence means we missed
+            // the loop boundary due to a lag spike — don't jump ahead; let Section 2
+            // snap us back to the start of the current sentence.
+            const isLoopOvershoot =
+              inPerSentenceLoop &&
+              currentTime > endTime &&
+              currentTime <= endTime + 1.5;
+            if (isWayOff && !isLoopOvershoot && !isTransitioningRef.current) {
               const matchingIndex = transcript.findIndex((s, i) => {
                 const nextOffset =
                   transcript[i + 1]?.offset || s.offset + s.duration + 1;
@@ -1433,7 +1445,11 @@ export default function App() {
           }
 
           // 2. Handle End of Sentence (Auto-Pause or Looping)
-          if (currentTime >= endTime - 0.1 && currentTime <= endTime + 0.5) {
+          if (
+            currentTime >= endTime - 0.1 &&
+            (currentTime <= endTime + 0.5 ||
+              (inPerSentenceLoop && currentTime <= endTime + 1.5))
+          ) {
             if (isTransitioningRef.current) return;
             isTransitioningRef.current = true;
 
