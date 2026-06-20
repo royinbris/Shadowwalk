@@ -644,6 +644,7 @@ export default function App() {
   const wakeLockRef = useRef<any>(null);
   const lastVirtualTimeUpdateRef = useRef<number>(0);
   const checkIntervalRef = useRef<number | null>(null);
+  const highlightRafRef = useRef<number | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const isTransitioningRef = useRef(false);
   const transitionTimeoutRef = useRef<any>(null);
@@ -1623,7 +1624,7 @@ export default function App() {
             }
           }
         }
-      }, 100);
+      }, 40);
     } else {
       if (checkIntervalRef.current) clearInterval(checkIntervalRef.current);
     }
@@ -1647,6 +1648,59 @@ export default function App() {
     isExpansionMode,
     isExpansionPaused,
     expansionCurrentEnd,
+  ]);
+
+  // Smooth highlight: track the active subtitle per animation frame (~16ms) in
+  // free-play modes. The 40ms interval still owns loop/auto-pause/transition logic.
+  useEffect(() => {
+    const followsAudio = isVideoOnly || (loopMode === 0 && !isAutoPause);
+    if (!isPlaying || transcript.length === 0 || isSubtitleOnly || !followsAudio) {
+      return;
+    }
+
+    const tick = () => {
+      highlightRafRef.current = requestAnimationFrame(tick);
+
+      if (
+        isRecordingRef.current ||
+        isPlayingRecordedRef.current ||
+        isResumingAfterRecordRef.current ||
+        isTransitioningRef.current ||
+        customLoopRef.current ||
+        expectedSeekTargetRef.current
+      )
+        return;
+
+      let currentTime = 0;
+      if (currentProject?.isVideoLocal) {
+        if (!videoRef.current) return;
+        currentTime = videoRef.current.currentTime;
+      } else {
+        if (!playerRef.current?.getCurrentTime) return;
+        currentTime = playerRef.current.getCurrentTime();
+      }
+
+      const matchingIndex = transcript.findIndex((s, i) => {
+        const nextOffset = transcript[i + 1]?.offset || s.offset + s.duration + 1;
+        return currentTime >= s.offset && currentTime < nextOffset;
+      });
+      if (matchingIndex !== -1) {
+        setCurrentIndex((prev) => (prev === matchingIndex ? prev : matchingIndex));
+      }
+    };
+
+    highlightRafRef.current = requestAnimationFrame(tick);
+    return () => {
+      if (highlightRafRef.current) cancelAnimationFrame(highlightRafRef.current);
+    };
+  }, [
+    isPlaying,
+    transcript,
+    isSubtitleOnly,
+    isVideoOnly,
+    loopMode,
+    isAutoPause,
+    currentProject,
   ]);
 
   const playSentence = useCallback(

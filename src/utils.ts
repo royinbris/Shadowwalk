@@ -157,10 +157,11 @@ export const preprocessSrt = (text: string): string => {
       const h = parseInt(srtTimeMatch[1], 10);
       const m = parseInt(srtTimeMatch[2], 10);
       const s = parseInt(srtTimeMatch[3], 10);
-      
-      const timeStr = h > 0 
-        ? `${h}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`
-        : `${m}:${s.toString().padStart(2, '0')}`;
+      const sec = `${s.toString().padStart(2, '0')}.${srtTimeMatch[4]}`;
+
+      const timeStr = h > 0
+        ? `${h}:${m.toString().padStart(2, '0')}:${sec}`
+        : `${m}:${sec}`;
       
       const textArr = [];
       let j = i + 1;
