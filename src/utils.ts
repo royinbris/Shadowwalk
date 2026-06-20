@@ -250,15 +250,17 @@ export const exportToGoogleDrive = async (project: Project) => {
   const FOLDER_NAME = '유튭영어';
 
   const getOrCreateDriveFolder = async (accessToken: string) => {
+    // Always target the oldest matching folder so duplicate-named folders don't
+    // cause exports to scatter across different folders.
     const query = `name='${FOLDER_NAME}' and mimeType='application/vnd.google-apps.folder' and trashed=false`;
-    const res = await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(query)}&fields=files(id)`, {
+    const res = await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(query)}&fields=files(id)&orderBy=createdTime`, {
       headers: { Authorization: `Bearer ${accessToken}` }
     });
     const data = await res.json();
     if (data.files && data.files.length > 0) {
       return data.files[0].id;
     }
-    
+
     const createRes = await fetch('https://www.googleapis.com/drive/v3/files', {
       method: 'POST',
       headers: {
@@ -366,9 +368,12 @@ export const fetchGoogleDriveFiles = async (accessToken: string) => {
   if (!folderData.files || folderData.files.length === 0) {
     return []; // Folder doesn't exist yet
   }
-  const folderId = folderData.files[0].id;
 
-  const query = `'${folderId}' in parents and mimeType='application/json' and trashed=false`;
+  // Gather files from every matching folder so duplicate-named folders never hide files.
+  const parentsClause = folderData.files
+    .map((f: any) => `'${f.id}' in parents`)
+    .join(' or ');
+  const query = `(${parentsClause}) and mimeType='application/json' and trashed=false`;
   const res = await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(query)}&fields=files(id,name,modifiedTime)&orderBy=modifiedTime desc`, {
     headers: { Authorization: `Bearer ${accessToken}` }
   });
