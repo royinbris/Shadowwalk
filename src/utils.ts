@@ -373,12 +373,68 @@ export const fetchGoogleDriveFiles = async (accessToken: string) => {
   const parentsClause = folderData.files
     .map((f: any) => `'${f.id}' in parents`)
     .join(' or ');
-  const query = `(${parentsClause}) and mimeType='application/json' and trashed=false`;
-  const res = await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(query)}&fields=files(id,name,modifiedTime)&orderBy=modifiedTime desc`, {
+  const query = `(${parentsClause}) and trashed=false and mimeType!='application/vnd.google-apps.folder'`;
+  const res = await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(query)}&fields=files(id,name,modifiedTime,mimeType)&orderBy=modifiedTime desc`, {
     headers: { Authorization: `Bearer ${accessToken}` }
   });
   const data = await res.json();
   return data.files || [];
+};
+
+export const downloadGoogleDriveText = async (accessToken: string, fileId: string): Promise<string> => {
+  const res = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`, {
+    headers: { Authorization: `Bearer ${accessToken}` }
+  });
+  if (!res.ok) throw new Error("Failed to download file");
+  return res.text();
+};
+
+export const downloadGoogleDriveBlob = async (accessToken: string, fileId: string): Promise<Blob> => {
+  const res = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`, {
+    headers: { Authorization: `Bearer ${accessToken}` }
+  });
+  if (!res.ok) throw new Error("Failed to download file");
+  return res.blob();
+};
+
+export const parseTranscriptText = (textContent: string): TranscriptItem[] => {
+  const processedInput = preprocessSrt(textContent);
+  const lines = processedInput.split("\n");
+  const items: TranscriptItem[] = [];
+  let current: TranscriptItem | null = null;
+
+  lines.forEach((line) => {
+    const trimmedLine = line.trim();
+    if (!trimmedLine) return;
+    const timeMatch = trimmedLine.match(/^[(\[](\d+:?\d*:?[\d\.]*)[)\]]\s*(.*)$/);
+    if (timeMatch) {
+      const parts = timeMatch[1].split(":").map(Number);
+      let seconds = 0;
+      if (parts.length === 3) seconds = parts[0] * 3600 + parts[1] * 60 + parts[2];
+      else if (parts.length === 2) seconds = parts[0] * 60 + parts[1];
+      else seconds = parts[0];
+      current = { text: timeMatch[2].trim(), offset: seconds, duration: 0 };
+      items.push(current);
+    } else {
+      const isTitleLine = trimmedLine.toLowerCase().startsWith("title:");
+      const isUrlLine = trimmedLine.toLowerCase().startsWith("url:");
+      if (current && !isTitleLine && !isUrlLine) {
+        if (!current.translation) current.translation = trimmedLine;
+        else if (!current.grammar) current.grammar = trimmedLine;
+        else current.grammar += "\n" + trimmedLine;
+      }
+    }
+  });
+
+  if (items.length > 0) {
+    for (let i = 0; i < items.length; i++) {
+      const nextOffset = items[i + 1]?.offset || items[i].offset + 5;
+      items[i].duration = Math.max(0.1, nextOffset - items[i].offset);
+    }
+  } else {
+    items.push({ text: textContent, offset: 0, duration: 999999 });
+  }
+  return items;
 };
 
 export const downloadGoogleDriveFile = async (accessToken: string, fileId: string) => {

@@ -1,17 +1,36 @@
 import React, { useState, useEffect } from 'react';
-import { fetchGoogleDriveFiles, downloadGoogleDriveFile, getGoogleToken } from '../utils';
+import {
+  fetchGoogleDriveFiles,
+  downloadGoogleDriveText,
+  downloadGoogleDriveBlob,
+  getGoogleToken,
+} from '../utils';
 
 interface DriveFile {
   id: string;
   name: string;
   modifiedTime: string;
+  mimeType?: string;
 }
 
 interface Props {
   isOpen: boolean;
   onClose: () => void;
-  onImport: (projectData: any) => void;
+  onImport: (payload: {
+    mediaBlob: Blob | null;
+    mediaName: string | null;
+    textContent: string | null;
+    isJson: boolean;
+  }) => void | Promise<void>;
 }
+
+const stripExt = (name: string) => name.replace(/\.[^/.]+$/, '');
+const isMediaFile = (f: DriveFile) =>
+  /\.(mp3|m4a|mp4|wav|ogg|aac|webm)$/i.test(f.name) ||
+  (f.mimeType || '').startsWith('audio/') ||
+  (f.mimeType || '').startsWith('video/');
+const isTextFile = (f: DriveFile) => /\.(txt|srt|vtt)$/i.test(f.name);
+const isJsonFile = (f: DriveFile) => /\.json$/i.test(f.name);
 
 export const GoogleDriveImportModal: React.FC<Props> = ({
   isOpen,
@@ -48,14 +67,56 @@ export const GoogleDriveImportModal: React.FC<Props> = ({
     }
   };
 
+  const findPair = (file: DriveFile, predicate: (f: DriveFile) => boolean) => {
+    const base = stripExt(file.name);
+    // Prefer an exact base-name match, otherwise a file whose base starts with this base.
+    return (
+      files.find((f) => f.id !== file.id && predicate(f) && stripExt(f.name) === base) ||
+      files.find(
+        (f) => f.id !== file.id && predicate(f) && stripExt(f.name).startsWith(base),
+      ) ||
+      null
+    );
+  };
+
   const handleFileClick = async (file: DriveFile) => {
     const token = (window as any)._driveToken;
     if (!token) return;
 
     setIsLoading(true);
     try {
-      const projectData = await downloadGoogleDriveFile(token, file.id);
-      onImport(projectData);
+      let mediaFile: DriveFile | null = null;
+      let textFile: DriveFile | null = null;
+      let jsonFile: DriveFile | null = null;
+
+      if (isMediaFile(file)) {
+        mediaFile = file;
+        textFile =
+          findPair(file, (f) => /\.txt$/i.test(f.name)) ||
+          findPair(file, isTextFile);
+        if (!textFile) jsonFile = findPair(file, isJsonFile);
+      } else if (isJsonFile(file)) {
+        jsonFile = file;
+        mediaFile = findPair(file, isMediaFile);
+      } else {
+        textFile = file;
+        mediaFile = findPair(file, isMediaFile);
+      }
+
+      const mediaBlob = mediaFile
+        ? await downloadGoogleDriveBlob(token, mediaFile.id)
+        : null;
+      const textSource = jsonFile || textFile;
+      const textContent = textSource
+        ? await downloadGoogleDriveText(token, textSource.id)
+        : null;
+
+      await onImport({
+        mediaBlob,
+        mediaName: mediaFile ? mediaFile.name : null,
+        textContent,
+        isJson: !!jsonFile,
+      });
       onClose();
     } catch (err) {
       console.error(err);
@@ -66,6 +127,13 @@ export const GoogleDriveImportModal: React.FC<Props> = ({
   };
 
   if (!isOpen) return null;
+
+  const badge = (f: DriveFile) => {
+    if (isMediaFile(f)) return '음원';
+    if (isJsonFile(f)) return 'JSON';
+    if (isTextFile(f)) return '자막';
+    return '파일';
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
@@ -93,21 +161,25 @@ export const GoogleDriveImportModal: React.FC<Props> = ({
             <div className="text-center text-zinc-500 py-8 font-bold">로딩 중...</div>
           ) : files.length === 0 && !error ? (
             <div className="text-center text-zinc-500 py-8 text-sm">
-              '유튭영어' 폴더에 저장된 파일이 없습니다.<br/>
-              (앱을 통해 Export한 파일만 표시됩니다)
+              '유튭영어' 폴더에 파일이 없습니다.
             </div>
           ) : (
             files.map(file => {
               const d = new Date(file.modifiedTime);
-              const displayName = file.name.replace(/\.json$/i, '');
+              const displayName = stripExt(file.name);
               return (
                 <button
                   key={file.id}
                   onClick={() => handleFileClick(file)}
                   className="w-full flex items-center justify-between bg-black/40 border border-zinc-800 hover:border-blue-400/50 py-2 px-2.5 rounded-xl transition-all group gap-2"
                 >
-                  <div className="text-sm font-sans font-medium text-zinc-200 group-hover:text-blue-400 transition-colors line-clamp-2 text-left flex-1 break-words pr-1">
-                    {displayName}
+                  <div className="flex items-center gap-2 flex-1 min-w-0">
+                    <span className="text-[9px] font-black px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-400 shrink-0">
+                      {badge(file)}
+                    </span>
+                    <span className="text-sm font-sans font-medium text-zinc-200 group-hover:text-blue-400 transition-colors line-clamp-2 text-left break-words pr-1">
+                      {displayName}
+                    </span>
                   </div>
                   <div className="flex flex-col items-center justify-center bg-zinc-800/60 rounded-lg p-1.5 min-w-[2.5rem] shrink-0">
                     <div className="text-[9px] text-zinc-400 font-bold leading-none mb-1">{d.getMonth() + 1}월</div>

@@ -22,6 +22,7 @@ import {
   exportToGoogleDrive,
   printSubtitles,
   preprocessSrt,
+  parseTranscriptText,
 } from "./utils";
 import { RefinementPromptModal } from "./components/RefinementPromptModal";
 import { ProjectCard } from "./components/ProjectCard";
@@ -865,6 +866,77 @@ export default function App() {
       setIsLoading(false);
       // Reset input
       e.target.value = "";
+    }
+  };
+
+  const importFromDrive = async (payload: {
+    mediaBlob: Blob | null;
+    mediaName: string | null;
+    textContent: string | null;
+    isJson: boolean;
+  }) => {
+    try {
+      setIsLoading(true);
+      setError(null);
+
+      let url: string | undefined;
+      let mediaFile: File | undefined;
+      if (payload.mediaBlob && payload.mediaName) {
+        mediaFile = new File([payload.mediaBlob], payload.mediaName, {
+          type: payload.mediaBlob.type,
+        });
+        url = URL.createObjectURL(mediaFile);
+      }
+      const baseName = payload.mediaName
+        ? payload.mediaName.replace(/\.[^/.]+$/, "")
+        : "Untitled";
+
+      let newProject: Project;
+      if (payload.isJson && payload.textContent) {
+        const jsonData = JSON.parse(payload.textContent);
+        newProject = {
+          ...jsonData,
+          id: Date.now().toString(),
+          title: jsonData.title || baseName,
+          createdAt: Date.now(),
+        };
+        if (mediaFile) {
+          newProject.isVideoLocal = true;
+          newProject.localFileName = payload.mediaName || undefined;
+        }
+      } else {
+        newProject = {
+          id: Date.now().toString(),
+          title: baseName,
+          videoId: "local",
+          transcript: parseTranscriptText(payload.textContent || ""),
+          createdAt: Date.now(),
+          isVideoLocal: !!mediaFile,
+          localFileName: payload.mediaName || undefined,
+        };
+      }
+
+      if (url && mediaFile) {
+        setLocalVideoUrl(url);
+        setLocalVideoFile(mediaFile);
+      }
+
+      setProjects((prev) => {
+        const next = [newProject, ...prev];
+        saveProjectsToStorage(next);
+        return next;
+      });
+
+      loadProject(newProject, url, mediaFile);
+      setView("study");
+    } catch (err) {
+      console.error(err);
+      setError(
+        "드라이브에서 불러오기에 실패했습니다. " +
+          (err instanceof Error ? err.message : ""),
+      );
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -4682,11 +4754,7 @@ ${actualQuery}`;
           <GoogleDriveImportModal
             isOpen={isDriveImportModalOpen}
             onClose={() => setIsDriveImportModalOpen(false)}
-            onImport={(project) => {
-              saveProject(project);
-              loadProject(project);
-              setView("study");
-            }}
+            onImport={importFromDrive}
           />
 
           {/* API Key Modal */}
