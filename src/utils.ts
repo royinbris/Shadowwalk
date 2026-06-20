@@ -204,6 +204,9 @@ export const getGoogleToken = (): Promise<string> => {
             reject(new Error("Token response invalid"));
           }
         },
+        error_callback: (err: any) => {
+          reject(err || new Error("Token request failed"));
+        },
       });
       client.requestAccessToken();
     } catch (err) {

@@ -40,19 +40,30 @@ export const GoogleDriveImportModal: React.FC<Props> = ({
   const [files, setFiles] = useState<DriveFile[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [attempted, setAttempted] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
-      loadFiles();
+      // iOS blocks popups not opened from a direct user gesture, so only
+      // auto-load when a token already exists; otherwise wait for a tap.
+      if ((window as any)._driveToken) {
+        loadFiles();
+      } else {
+        setFiles([]);
+        setError(null);
+        setAttempted(false);
+      }
     } else {
       setFiles([]);
       setError(null);
+      setAttempted(false);
     }
   }, [isOpen]);
 
   const loadFiles = async () => {
     setIsLoading(true);
     setError(null);
+    setAttempted(true);
 
     try {
       const accessToken = await getGoogleToken();
@@ -159,6 +170,18 @@ export const GoogleDriveImportModal: React.FC<Props> = ({
         <div className="flex-1 overflow-y-auto pr-2 space-y-1.5">
           {isLoading ? (
             <div className="text-center text-zinc-500 py-8 font-bold">로딩 중...</div>
+          ) : !attempted || (error && files.length === 0) ? (
+            <div className="flex flex-col items-center gap-3 py-8">
+              <button
+                onClick={loadFiles}
+                className="px-5 py-3 rounded-xl font-bold bg-blue-600 hover:bg-blue-500 text-white transition-colors"
+              >
+                구글 드라이브 연결
+              </button>
+              <p className="text-xs text-zinc-500 text-center">
+                버튼을 눌러 구글 로그인 후 파일을 불러옵니다.
+              </p>
+            </div>
           ) : files.length === 0 && !error ? (
             <div className="text-center text-zinc-500 py-8 text-sm">
               '유튭영어' 폴더에 파일이 없습니다.
