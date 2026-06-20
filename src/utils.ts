@@ -193,7 +193,7 @@ export const getGoogleToken = (): Promise<string> => {
     try {
       const client = (window as any).google.accounts.oauth2.initTokenClient({
         client_id: GOOGLE_CLIENT_ID,
-        scope: 'https://www.googleapis.com/auth/drive.file',
+        scope: 'https://www.googleapis.com/auth/drive',
         callback: (tokenResponse: any) => {
           if (tokenResponse && tokenResponse.access_token) {
             cachedDriveToken = tokenResponse.access_token;
