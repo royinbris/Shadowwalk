@@ -102,7 +102,6 @@ export const ScriptEditor = ({
                 </button>
                 <input
                   type="file"
-                  accept=".srt,.txt"
                   ref={fileInputRef}
                   onChange={handleFileUpload}
                   className="hidden"
@@ -116,7 +115,6 @@ export const ScriptEditor = ({
                 </button>
                 <input
                   type="file"
-                  accept=".txt"
                   ref={txtFileInputRef}
                   onChange={handleFileUpload}
                   className="hidden"

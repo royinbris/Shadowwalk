@@ -53,19 +53,17 @@ export const LibraryView = ({
           <div className="flex justify-end items-center gap-2">
             <input 
               type="file" 
-              ref={fileInputRef} 
-              onChange={handleFileImport} 
-              className="hidden" 
-              accept=".json"
+              ref={fileInputRef}
+              onChange={handleFileImport}
+              className="hidden"
             />
             <label className="cursor-pointer flex items-center bg-zinc-800 hover:bg-zinc-700 px-3 py-2 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all text-zinc-300 gap-1.5 border border-zinc-700">
               <Upload size={14} className="text-yellow-500" />
               음원+TXT
-              <input 
-                type="file" 
-                accept="audio/*,video/*,.mp4,.mp3,.m4a,.json,.txt,.srt" 
-                multiple 
-                className="hidden" 
+              <input
+                type="file"
+                multiple
+                className="hidden"
                 onChange={handleLocalFileSelection}
               />
             </label>

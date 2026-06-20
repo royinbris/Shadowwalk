@@ -39,7 +39,6 @@ export const ScriptLibraryPanel = ({
             ref={fileInputRef}
             onChange={handleFileImport}
             className="hidden"
-            accept=".json"
           />
 
           {/*
