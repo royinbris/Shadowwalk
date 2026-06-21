@@ -658,8 +658,6 @@ export default function App() {
   const keyRepeatDelayRef = useRef<any>(null);
   const activeKeysRef = useRef<Set<string>>(new Set());
   const fullscreenContainerRef = useRef<HTMLDivElement>(null);
-  const readerTapCountRef = useRef(0);
-  const readerTapTimerRef = useRef<any>(null);
   const readerPointerStartRef = useRef<{ x: number; y: number } | null>(null);
   const readerStageRef = useRef<HTMLDivElement>(null);
   const readerTextRef = useRef<HTMLParagraphElement>(null);
@@ -1802,11 +1800,17 @@ export default function App() {
     const el = readerTextRef.current;
     if (!stage || !el) return;
 
+    // 가용 높이 = 무대 높이 - 세로 패딩 (safe-area는 좌우 패딩으로 들어가 폭을 줄임)
+    const padY =
+      parseFloat(getComputedStyle(stage).paddingTop) +
+      parseFloat(getComputedStyle(stage).paddingBottom);
+    const availH = stage.clientHeight - padY;
+
     let size = 60;
     el.style.fontSize = size + "pt";
     while (
       size > 16 &&
-      (el.scrollWidth > stage.clientWidth || el.scrollHeight > stage.clientHeight)
+      (el.scrollWidth > el.clientWidth || el.scrollHeight > availH)
     ) {
       size -= 2;
       el.style.fontSize = size + "pt";
@@ -1814,47 +1818,12 @@ export default function App() {
   }, [showSubtitleReader, currentIndex, transcript]);
 
   const closeSubtitleReader = useCallback(() => {
-    if (readerTapTimerRef.current) clearTimeout(readerTapTimerRef.current);
-    readerTapCountRef.current = 0;
     setShowSubtitleReader(false);
   }, []);
 
   const handleReaderPointerDown = useCallback((e: React.PointerEvent) => {
     readerPointerStartRef.current = { x: e.clientX, y: e.clientY };
   }, []);
-
-  const handleReaderPointerUp = useCallback(
-    (e: React.PointerEvent) => {
-      const start = readerPointerStartRef.current;
-      readerPointerStartRef.current = null;
-      if (!start) return;
-
-      const dx = e.clientX - start.x;
-      const dy = e.clientY - start.y;
-
-      // 어느 위치에서든 스와이프(드래그)하면 닫기
-      if (Math.abs(dx) > 80 || Math.abs(dy) > 80) {
-        closeSubtitleReader();
-        return;
-      }
-
-      readerTapCountRef.current += 1;
-      if (readerTapCountRef.current >= 3) {
-        closeSubtitleReader();
-        return;
-      }
-      if (readerTapTimerRef.current) clearTimeout(readerTapTimerRef.current);
-      const tapX = e.clientX;
-      readerTapTimerRef.current = setTimeout(() => {
-        if (readerTapCountRef.current === 1) {
-          if (tapX < window.innerWidth / 2) prevSentence();
-          else nextSentence();
-        }
-        readerTapCountRef.current = 0;
-      }, 280);
-    },
-    [prevSentence, nextSentence, closeSubtitleReader],
-  );
 
   const togglePlay = useCallback(() => {
     if (isSubtitleOnly) {
@@ -1969,6 +1938,41 @@ export default function App() {
       document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
   }, [isPlaying]);
+
+  // 자막 리더는 90° 회전 상태 → 가로화면 기준 제스처를 물리 좌표로 매핑.
+  // 가로 좌=물리 상단, 가로 우=물리 하단, 가로 위→아래=물리 좌향.
+  const handleReaderPointerUp = useCallback(
+    (e: React.PointerEvent) => {
+      const start = readerPointerStartRef.current;
+      readerPointerStartRef.current = null;
+      if (!start) return;
+
+      const dx = e.clientX - start.x;
+      const dy = e.clientY - start.y;
+      const absX = Math.abs(dx);
+      const absY = Math.abs(dy);
+      const SWIPE = 60;
+
+      if (absX > SWIPE || absY > SWIPE) {
+        if (absY >= absX) {
+          // 물리 수직 스와이프 = 가로화면 좌/우 스와이프 → 이전/다음
+          if (dy < 0) prevSentence();
+          else nextSentence();
+        } else if (dx < 0) {
+          // 물리 좌향 스와이프 = 가로화면 위→아래 → 닫기
+          closeSubtitleReader();
+        }
+        return;
+      }
+
+      // 탭: 화면(가로 기준)을 3등분 = 물리 Y 3등분
+      const h = window.innerHeight;
+      if (e.clientY < h / 3) prevSentence();
+      else if (e.clientY > (h * 2) / 3) nextSentence();
+      else togglePlay();
+    },
+    [prevSentence, nextSentence, closeSubtitleReader, togglePlay],
+  );
 
   const changePlaybackRate = () => {
     const rates = [0.75, 1, 1.25];
@@ -4758,11 +4762,14 @@ ${actualQuery}`;
             >
               <div
                 ref={readerStageRef}
-                className="absolute top-1/2 left-1/2 flex items-center justify-center px-10"
+                className="absolute top-1/2 left-1/2 flex items-center justify-center"
                 style={{
                   width: "100vh",
                   height: "100vw",
                   transform: "translate(-50%, -50%) rotate(90deg)",
+                  // 로컬 가로축(width=100vh) = 물리 세로축. 좌=상단바, 우=홈인디케이터.
+                  paddingLeft: "calc(2.5rem + env(safe-area-inset-top))",
+                  paddingRight: "calc(2.5rem + env(safe-area-inset-bottom))",
                 }}
               >
                 <p
