@@ -168,7 +168,7 @@ export const ScriptEditor = ({
                           <head>
                             <title>Print EN Transcript</title>
                             <style>
-                              body { font-family: sans-serif; padding: 20px; white-space: pre-wrap; line-height: 1.5; font-size: 14px; color: black; }
+                              body { font-family: 'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR', sans-serif; padding: 20px; white-space: pre-wrap; line-height: 1.5; font-size: 14px; color: black; }
                             </style>
                           </head>
                           <body>${enOnly.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</body>
@@ -198,7 +198,7 @@ export const ScriptEditor = ({
                           <head>
                             <title>Print Transcript</title>
                             <style>
-                              body { font-family: sans-serif; padding: 20px; white-space: pre-wrap; line-height: 1.5; font-size: 14px; color: black; }
+                              body { font-family: 'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR', sans-serif; padding: 20px; white-space: pre-wrap; line-height: 1.5; font-size: 14px; color: black; }
                             </style>
                           </head>
                           <body>${unifiedInput.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</body>
