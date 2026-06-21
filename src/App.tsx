@@ -4750,7 +4750,7 @@ ${actualQuery}`;
               >
                 <p
                   className="text-white text-center font-bold leading-snug break-words"
-                  style={{ fontSize: "80pt" }}
+                  style={{ fontSize: "60pt" }}
                 >
                   {transcript[currentIndex]?.text || ""}
                 </p>
