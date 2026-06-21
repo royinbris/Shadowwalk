@@ -46,7 +46,14 @@ export const GuideModal: React.FC<GuideModalProps> = ({ onClose }) => {
   return (
     <div className="fixed inset-0 z-[9999] flex flex-col bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-200 overflow-hidden animate-in fade-in duration-200 h-[100dvh]">
       {/* Header */}
-      <div className="flex-none flex items-center justify-between p-4 border-b border-zinc-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/50 backdrop-blur-md no-print">
+      <div
+        className="flex-none flex items-center justify-between p-4 border-b border-zinc-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/50 backdrop-blur-md no-print"
+        style={{
+          paddingTop: "calc(1rem + env(safe-area-inset-top))",
+          paddingRight: "calc(1rem + env(safe-area-inset-right))",
+          paddingLeft: "calc(1rem + env(safe-area-inset-left))",
+        }}
+      >
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center">
             <BookOpen className="w-4 h-4 text-blue-400" />
