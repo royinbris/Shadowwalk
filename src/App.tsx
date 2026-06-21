@@ -4797,8 +4797,8 @@ ${actualQuery}`;
                       </p>
                     )}
                     {transcript[currentIndex]?.grammar && (
-                      <p className="text-white/60 leading-snug break-words whitespace-pre-line">
-                        {transcript[currentIndex]?.grammar}
+                      <p className="text-white/60 leading-snug break-words">
+                        {transcript[currentIndex]?.grammar?.replace(/\s*\n+\s*/g, " · ")}
                       </p>
                     )}
                   </div>
