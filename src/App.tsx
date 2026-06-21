@@ -27,7 +27,7 @@ import { ProjectCard } from "./components/ProjectCard";
 import { PromptEditorModal } from "./components/PromptEditorModal";
 import { THEMES } from "./themes";
 import { ApiKeyModal } from "./components/ApiKeyModal";
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useLayoutEffect, useRef, useCallback } from "react";
 import {
   Play,
   Pause,
@@ -661,6 +661,8 @@ export default function App() {
   const readerTapCountRef = useRef(0);
   const readerTapTimerRef = useRef<any>(null);
   const readerPointerStartRef = useRef<{ x: number; y: number } | null>(null);
+  const readerStageRef = useRef<HTMLDivElement>(null);
+  const readerTextRef = useRef<HTMLParagraphElement>(null);
 
   useEffect(() => {
     const handleFullscreenChange = () => {
@@ -1793,6 +1795,23 @@ export default function App() {
       playSentence(currentIndex - 1);
     }
   }, [currentIndex, playSentence, isSubtitleOnly]);
+
+  useLayoutEffect(() => {
+    if (!showSubtitleReader) return;
+    const stage = readerStageRef.current;
+    const el = readerTextRef.current;
+    if (!stage || !el) return;
+
+    let size = 60;
+    el.style.fontSize = size + "pt";
+    while (
+      size > 16 &&
+      (el.scrollWidth > stage.clientWidth || el.scrollHeight > stage.clientHeight)
+    ) {
+      size -= 2;
+      el.style.fontSize = size + "pt";
+    }
+  }, [showSubtitleReader, currentIndex, transcript]);
 
   const closeSubtitleReader = useCallback(() => {
     if (readerTapTimerRef.current) clearTimeout(readerTapTimerRef.current);
@@ -4738,6 +4757,7 @@ ${actualQuery}`;
               className="fixed inset-0 z-[200] bg-black overflow-hidden select-none touch-none cursor-pointer"
             >
               <div
+                ref={readerStageRef}
                 className="absolute top-1/2 left-1/2 flex items-center justify-center px-10"
                 style={{
                   width: "100vh",
@@ -4746,6 +4766,7 @@ ${actualQuery}`;
                 }}
               >
                 <p
+                  ref={readerTextRef}
                   className="text-white text-center font-bold leading-snug break-words"
                   style={{ fontSize: "60pt" }}
                 >
