@@ -4738,14 +4738,23 @@ ${actualQuery}`;
             <div
               onPointerDown={handleReaderPointerDown}
               onPointerUp={handleReaderPointerUp}
-              className="fixed inset-0 z-[200] bg-black flex items-center justify-center px-12 select-none touch-none cursor-pointer"
+              className="fixed inset-0 z-[200] bg-black overflow-hidden select-none touch-none cursor-pointer"
             >
-              <p
-                className="text-white text-center font-bold leading-snug break-words"
-                style={{ fontSize: "50pt", transform: "rotate(90deg)", width: "100vh" }}
+              <div
+                className="absolute top-1/2 left-1/2 flex items-center justify-center px-10"
+                style={{
+                  width: "100vh",
+                  height: "100vw",
+                  transform: "translate(-50%, -50%) rotate(90deg)",
+                }}
               >
-                {transcript[currentIndex]?.text || ""}
-              </p>
+                <p
+                  className="text-white text-center font-bold leading-snug break-words"
+                  style={{ fontSize: "80pt" }}
+                >
+                  {transcript[currentIndex]?.text || ""}
+                </p>
+              </div>
             </div>
           )}
 
