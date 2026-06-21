@@ -188,7 +188,10 @@ export const parseTranscriptText = (textContent: string): TranscriptItem[] => {
   lines.forEach((line) => {
     const trimmedLine = line.trim();
     if (!trimmedLine) return;
-    const timeMatch = trimmedLine.match(/^[(\[](\d+:?\d*:?[\d\.]*)[)\]]\s*(.*)$/);
+    // 괄호 유무와 무관하게 줄 시작의 타임코드를 인식 (예: "(0:24.9) ..." / "0:24.9 ...")
+    const timeMatch =
+      trimmedLine.match(/^[(\[](\d+:?\d*:?[\d\.]*)[)\]]\s*(.*)$/) ||
+      trimmedLine.match(/^(\d{1,2}:\d{1,2}(?::\d{1,2})?(?:\.\d+)?)\s+(.+)$/);
     if (timeMatch) {
       const parts = timeMatch[1].split(":").map(Number);
       let seconds = 0;
