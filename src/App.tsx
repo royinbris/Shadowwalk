@@ -4761,7 +4761,7 @@ ${actualQuery}`;
               className="fixed inset-0 z-[200] bg-black overflow-hidden select-none touch-none cursor-pointer"
             >
               <div
-                className="absolute top-1/2 left-1/2 flex flex-col"
+                className="absolute top-1/2 left-1/2 flex flex-col gap-1"
                 style={{
                   width: "100vh",
                   height: "100vw",
@@ -4769,10 +4769,18 @@ ${actualQuery}`;
                   // 로컬 가로축(width=100vh) = 물리 세로축. 좌=상단바, 우=홈인디케이터.
                   paddingLeft: "calc(2.5rem + env(safe-area-inset-top))",
                   paddingRight: "calc(2.5rem + env(safe-area-inset-bottom))",
-                  paddingBottom: "1.5rem",
-                  paddingTop: "1.5rem",
+                  paddingBottom: "0.75rem",
+                  paddingTop: "0.75rem",
                 }}
               >
+                {transcript[currentIndex]?.translation && (
+                  <p
+                    className="shrink-0 text-center text-white/85 leading-tight break-words"
+                    style={{ fontSize: "15pt" }}
+                  >
+                    {transcript[currentIndex]?.translation}
+                  </p>
+                )}
                 <div
                   ref={readerStageRef}
                   className="flex-1 min-h-0 flex items-center justify-center overflow-hidden"
@@ -4785,23 +4793,13 @@ ${actualQuery}`;
                     {transcript[currentIndex]?.text || ""}
                   </p>
                 </div>
-                {(transcript[currentIndex]?.translation ||
-                  transcript[currentIndex]?.grammar) && (
-                  <div
-                    className="shrink-0 text-center space-y-1 mt-3"
+                {transcript[currentIndex]?.grammar && (
+                  <p
+                    className="shrink-0 text-center text-white/60 leading-tight break-words"
                     style={{ fontSize: "15pt" }}
                   >
-                    {transcript[currentIndex]?.translation && (
-                      <p className="text-white/85 leading-snug break-words">
-                        {transcript[currentIndex]?.translation}
-                      </p>
-                    )}
-                    {transcript[currentIndex]?.grammar && (
-                      <p className="text-white/60 leading-snug break-words">
-                        {transcript[currentIndex]?.grammar?.replace(/\s*\n+\s*/g, " · ")}
-                      </p>
-                    )}
-                  </div>
+                    {transcript[currentIndex]?.grammar?.replace(/\s*\n+\s*/g, " · ")}
+                  </p>
                 )}
               </div>
             </div>
