@@ -1813,14 +1813,11 @@ export default function App() {
       const dx = e.clientX - start.x;
       const dy = e.clientY - start.y;
 
-      // 상단에서 아래로 스와이프 → 닫기
-      if (start.y < 120 && dy > 90 && Math.abs(dy) > Math.abs(dx)) {
+      // 어느 위치에서든 스와이프(드래그)하면 닫기
+      if (Math.abs(dx) > 80 || Math.abs(dy) > 80) {
         closeSubtitleReader();
         return;
       }
-
-      // 명백한 스와이프(드래그)는 탭으로 처리하지 않음
-      if (Math.abs(dx) > 40 || Math.abs(dy) > 40) return;
 
       readerTapCountRef.current += 1;
       if (readerTapCountRef.current >= 3) {
