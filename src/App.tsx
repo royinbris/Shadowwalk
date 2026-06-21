@@ -2728,15 +2728,23 @@ ${actualQuery}`;
   const testApiKey = async () => {
     setIsGeminiLoading(true);
     try {
-      const responseText = await generateAIContent(
-        "Test connection. Respond with 'OK' only.",
-      );
+      const responseText = await Promise.race([
+        generateAIContent("Test connection. Respond with 'OK' only."),
+        new Promise<string>((_, reject) =>
+          setTimeout(
+            () => reject(new Error("응답 시간 초과. 다시 시도해 주세요.")),
+            25000,
+          ),
+        ),
+      ]);
       if (responseText) {
-        alert("✅ 연결 성공! API 키가 정상적으로 작동합니다.");
+        showCopyFeedback("✅ 연결 성공! API 키가 정상 작동합니다.");
+      } else {
+        showCopyFeedback("❌ 빈 응답입니다. 키와 모델을 확인하세요.");
       }
     } catch (err: any) {
       console.error("Test Error:", err);
-      alert(`❌ 연결 실패: ${err.message || "알 수 없는 오류"}`);
+      showCopyFeedback(`❌ 연결 실패: ${err.message || "알 수 없는 오류"}`);
     } finally {
       setIsGeminiLoading(false);
     }
