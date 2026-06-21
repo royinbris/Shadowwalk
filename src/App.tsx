@@ -19,18 +19,14 @@ import {
   extractVideoId,
   formatTranscriptToUnified,
   exportProject,
-  exportToGoogleDrive,
   printSubtitles,
   preprocessSrt,
-  parseTranscriptText,
-  consumeGoogleRedirectToken,
 } from "./utils";
 import { RefinementPromptModal } from "./components/RefinementPromptModal";
 import { ProjectCard } from "./components/ProjectCard";
 import { PromptEditorModal } from "./components/PromptEditorModal";
 import { THEMES } from "./themes";
 import { ApiKeyModal } from "./components/ApiKeyModal";
-import { GoogleDriveImportModal } from "./components/GoogleDriveImportModal";
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import {
   Play,
@@ -62,6 +58,7 @@ import {
   RefreshCw,
   Maximize,
   Minimize,
+  Type,
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { GoogleGenAI } from "@google/genai";
@@ -138,6 +135,7 @@ export default function App() {
   const [isPlayerReady, setIsPlayerReady] = useState(false);
   const [showSyncControls, setShowSyncControls] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [showSubtitleReader, setShowSubtitleReader] = useState(false);
   const [geminiApiKeys, setGeminiApiKeys] = useState<string[]>(() => {
     try {
       const saved = localStorage.getItem("user_gemini_api_keys");
@@ -180,18 +178,9 @@ export default function App() {
   const [isApiKeyVisible, setIsApiKeyVisible] = useState(false);
 
   const handleExportProject = useCallback((project: Project) => {
-    // exportProject(project); // 로컬 저장 기능 중지 (향후 대비용으로 남겨둠)
-    exportToGoogleDrive(project);
+    exportProject(project);
   }, []);
   const [isApiKeyModalOpen, setIsApiKeyModalOpen] = useState(false);
-  const [isDriveImportModalOpen, setIsDriveImportModalOpen] = useState(false);
-
-  useEffect(() => {
-    // Returning from the iOS Google OAuth redirect: pick up the token and reopen the picker.
-    if (consumeGoogleRedirectToken()) {
-      setIsDriveImportModalOpen(true);
-    }
-  }, []);
 
   const [isContinuous, setIsContinuous] = useState(true);
   const [isAutoAdvanceLoop, setIsAutoAdvanceLoop] = useState(true);
@@ -669,6 +658,9 @@ export default function App() {
   const keyRepeatDelayRef = useRef<any>(null);
   const activeKeysRef = useRef<Set<string>>(new Set());
   const fullscreenContainerRef = useRef<HTMLDivElement>(null);
+  const readerTapCountRef = useRef(0);
+  const readerTapTimerRef = useRef<any>(null);
+  const readerPointerStartRef = useRef<{ x: number; y: number } | null>(null);
 
   useEffect(() => {
     const handleFullscreenChange = () => {
@@ -875,77 +867,6 @@ export default function App() {
       setIsLoading(false);
       // Reset input
       e.target.value = "";
-    }
-  };
-
-  const importFromDrive = async (payload: {
-    mediaBlob: Blob | null;
-    mediaName: string | null;
-    textContent: string | null;
-    isJson: boolean;
-  }) => {
-    try {
-      setIsLoading(true);
-      setError(null);
-
-      let url: string | undefined;
-      let mediaFile: File | undefined;
-      if (payload.mediaBlob && payload.mediaName) {
-        mediaFile = new File([payload.mediaBlob], payload.mediaName, {
-          type: payload.mediaBlob.type,
-        });
-        url = URL.createObjectURL(mediaFile);
-      }
-      const baseName = payload.mediaName
-        ? payload.mediaName.replace(/\.[^/.]+$/, "")
-        : "Untitled";
-
-      let newProject: Project;
-      if (payload.isJson && payload.textContent) {
-        const jsonData = JSON.parse(payload.textContent);
-        newProject = {
-          ...jsonData,
-          id: Date.now().toString(),
-          title: jsonData.title || baseName,
-          createdAt: Date.now(),
-        };
-        if (mediaFile) {
-          newProject.isVideoLocal = true;
-          newProject.localFileName = payload.mediaName || undefined;
-        }
-      } else {
-        newProject = {
-          id: Date.now().toString(),
-          title: baseName,
-          videoId: "local",
-          transcript: parseTranscriptText(payload.textContent || ""),
-          createdAt: Date.now(),
-          isVideoLocal: !!mediaFile,
-          localFileName: payload.mediaName || undefined,
-        };
-      }
-
-      if (url && mediaFile) {
-        setLocalVideoUrl(url);
-        setLocalVideoFile(mediaFile);
-      }
-
-      setProjects((prev) => {
-        const next = [newProject, ...prev];
-        saveProjectsToStorage(next);
-        return next;
-      });
-
-      loadProject(newProject, url, mediaFile);
-      setView("study");
-    } catch (err) {
-      console.error(err);
-      setError(
-        "드라이브에서 불러오기에 실패했습니다. " +
-          (err instanceof Error ? err.message : ""),
-      );
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -1872,6 +1793,52 @@ export default function App() {
       playSentence(currentIndex - 1);
     }
   }, [currentIndex, playSentence, isSubtitleOnly]);
+
+  const closeSubtitleReader = useCallback(() => {
+    if (readerTapTimerRef.current) clearTimeout(readerTapTimerRef.current);
+    readerTapCountRef.current = 0;
+    setShowSubtitleReader(false);
+  }, []);
+
+  const handleReaderPointerDown = useCallback((e: React.PointerEvent) => {
+    readerPointerStartRef.current = { x: e.clientX, y: e.clientY };
+  }, []);
+
+  const handleReaderPointerUp = useCallback(
+    (e: React.PointerEvent) => {
+      const start = readerPointerStartRef.current;
+      readerPointerStartRef.current = null;
+      if (!start) return;
+
+      const dx = e.clientX - start.x;
+      const dy = e.clientY - start.y;
+
+      // 상단에서 아래로 스와이프 → 닫기
+      if (start.y < 120 && dy > 90 && Math.abs(dy) > Math.abs(dx)) {
+        closeSubtitleReader();
+        return;
+      }
+
+      // 명백한 스와이프(드래그)는 탭으로 처리하지 않음
+      if (Math.abs(dx) > 40 || Math.abs(dy) > 40) return;
+
+      readerTapCountRef.current += 1;
+      if (readerTapCountRef.current >= 3) {
+        closeSubtitleReader();
+        return;
+      }
+      if (readerTapTimerRef.current) clearTimeout(readerTapTimerRef.current);
+      const tapX = e.clientX;
+      readerTapTimerRef.current = setTimeout(() => {
+        if (readerTapCountRef.current === 1) {
+          if (tapX < window.innerWidth / 2) prevSentence();
+          else nextSentence();
+        }
+        readerTapCountRef.current = 0;
+      }, 280);
+    },
+    [prevSentence, nextSentence, closeSubtitleReader],
+  );
 
   const togglePlay = useCallback(() => {
     if (isSubtitleOnly) {
@@ -3335,7 +3302,6 @@ ${actualQuery}`;
                 handleLocalFileSelection={handleLocalFileSelection}
                 startNewProject={startNewProject}
                 openEditor={openEditor}
-                onOpenDriveImport={() => setIsDriveImportModalOpen(true)}
               />
             )}
 
@@ -3460,6 +3426,25 @@ ${actualQuery}`;
                 id="study-fullscreen-container"
                 className={`flex-1 flex flex-col min-h-0 relative ${isFullscreen ? "bg-black !fixed !inset-0 !z-[100] !w-full !h-[100dvh]" : ""}`}
               >
+                {isFullscreen && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (document.fullscreenElement) {
+                        document.exitFullscreen().catch(() => setIsFullscreen(false));
+                      } else {
+                        setIsFullscreen(false);
+                      }
+                    }}
+                    onPointerDown={(e) => e.stopPropagation()}
+                    className="absolute top-0 left-0 z-[110] cursor-pointer touch-none p-3 group bg-transparent"
+                    title="전체 화면 축소"
+                  >
+                    <div className="p-2.5 bg-black/40 backdrop-blur-sm rounded-xl text-white/80 group-active:text-white pointer-events-none transition-all group-active:scale-95 border border-white/30 shadow-sm">
+                      <Minimize className="w-5 h-5" />
+                    </div>
+                  </button>
+                )}
                 <VideoArea
                   videoId={videoId}
                   showGeminiHelper={showGeminiHelper}
@@ -3491,6 +3476,19 @@ ${actualQuery}`;
                   >
                     <div className="p-2.5 bg-transparent rounded-xl text-white/80 group-active:text-white pointer-events-none transition-all group-active:scale-95 border border-white/30 shadow-sm">
                       {isFullscreen ? <Minimize className="w-5 h-5" /> : <Maximize className="w-5 h-5" />}
+                    </div>
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setShowSubtitleReader(true);
+                    }}
+                    onPointerDown={(e) => e.stopPropagation()}
+                    className="absolute top-1/2 -translate-y-1/2 left-0 z-[100] cursor-pointer touch-none p-3 group bg-transparent"
+                    title="영어 자막 전체화면"
+                  >
+                    <div className="p-2.5 bg-transparent rounded-xl text-white/80 group-active:text-white pointer-events-none transition-all group-active:scale-95 border border-white/30 shadow-sm">
+                      <Type className="w-5 h-5" />
                     </div>
                   </button>
                   <FloatingVideoSeekControls
@@ -4529,7 +4527,6 @@ ${actualQuery}`;
                       handleFileImport={handleFileImport}
                       handleLocalFileSelection={handleLocalFileSelection}
                       startNewProject={startNewProject}
-                      onOpenDriveImport={() => setIsDriveImportModalOpen(true)}
                     />
                   ) : rightView === "settings" ? (
                     <SettingsPanel
@@ -4736,6 +4733,22 @@ ${actualQuery}`;
             )}
           </motion.div>
 
+          {/* English Subtitle Fullscreen Reader */}
+          {showSubtitleReader && (
+            <div
+              onPointerDown={handleReaderPointerDown}
+              onPointerUp={handleReaderPointerUp}
+              className="fixed inset-0 z-[200] bg-black flex items-center justify-center px-12 select-none touch-none cursor-pointer"
+            >
+              <p
+                className="text-white text-center font-bold leading-snug break-words"
+                style={{ fontSize: "50pt", transform: "rotate(90deg)", width: "100vh" }}
+              >
+                {transcript[currentIndex]?.text || ""}
+              </p>
+            </div>
+          )}
+
           {/* Shared Prompt Editor Modal */}
           <PromptEditorModal
             isOpen={isPromptEditorOpen}
@@ -4757,13 +4770,6 @@ ${actualQuery}`;
             onClose={() => setIsEditingPrompt(false)}
             refinementPrompt={refinementPrompt}
             setRefinementPrompt={setRefinementPrompt}
-          />
-
-          {/* Google Drive Import Modal */}
-          <GoogleDriveImportModal
-            isOpen={isDriveImportModalOpen}
-            onClose={() => setIsDriveImportModalOpen(false)}
-            onImport={importFromDrive}
           />
 
           {/* API Key Modal */}

@@ -1,16 +1,8 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { motion } from 'motion/react';
-import { Upload, Plus, Download, FileText, Cloud } from 'lucide-react';
+import { Upload, Plus, Download, FileText, Cloud, LayoutGrid, List } from 'lucide-react';
 import { Project } from '../types';
 import { ProjectCard } from './ProjectCard';
-
-const GoogleDriveIcon = ({ className = "w-3.5 h-3.5" }) => (
-  <img 
-    src="https://upload.wikimedia.org/wikipedia/commons/1/12/Google_Drive_icon_%282020%29.svg" 
-    className={className} 
-    alt="Drive" 
-  />
-);
 
 interface LibraryViewProps {
   projects: Project[];
@@ -22,7 +14,6 @@ interface LibraryViewProps {
   handleLocalFileSelection: (e: React.ChangeEvent<HTMLInputElement>) => void;
   startNewProject: () => void;
   openEditor: () => void;
-  onOpenDriveImport: () => void;
 }
 
 export const LibraryView = ({
@@ -34,10 +25,20 @@ export const LibraryView = ({
   handleFileImport,
   handleLocalFileSelection,
   startNewProject,
-  openEditor,
-  onOpenDriveImport
+  openEditor
 }: LibraryViewProps) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>(
+    () => (localStorage.getItem('library_view_mode') as 'grid' | 'list') || 'grid'
+  );
+
+  const toggleViewMode = () => {
+    setViewMode((prev) => {
+      const next = prev === 'grid' ? 'list' : 'grid';
+      localStorage.setItem('library_view_mode', next);
+      return next;
+    });
+  };
 
   return (
     <motion.div 
@@ -52,7 +53,8 @@ export const LibraryView = ({
           <h2 className="text-lg font-black uppercase italic mb-2">Saved Scripts</h2>
           <div className="flex justify-end items-center gap-2">
             <input 
-              type="file" 
+              type="file"
+              accept=".json,application/json"
               ref={fileInputRef}
               onChange={handleFileImport}
               className="hidden"
@@ -79,14 +81,16 @@ export const LibraryView = ({
               className="flex items-center gap-1.5 bg-zinc-800 hover:bg-zinc-700 px-3 py-2 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all text-zinc-300 border border-zinc-700"
             >
               <Cloud className="w-3.5 h-3.5 text-sky-400" />
-              iCloud
+              불러오기
             </button>
-            <button 
-              onClick={onOpenDriveImport}
+            <button
+              onClick={toggleViewMode}
               className="flex items-center gap-1.5 bg-zinc-800 hover:bg-zinc-700 px-3 py-2 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all text-zinc-300 border border-zinc-700"
+              title={viewMode === 'grid' ? '리스트 보기' : '박스 보기'}
             >
-              <GoogleDriveIcon />
-              Drive
+              {viewMode === 'grid'
+                ? <List className="w-3.5 h-3.5 text-sky-400" />
+                : <LayoutGrid className="w-3.5 h-3.5 text-sky-400" />}
             </button>
             <span className="text-zinc-500 font-mono text-[10px] self-center ml-1">{projects.length} ITEMS</span>
           </div>
@@ -106,7 +110,9 @@ export const LibraryView = ({
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 gap-4">
+          <div className={viewMode === 'grid'
+            ? "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 gap-4"
+            : "flex flex-col gap-2"}>
             {projects.map(project => (
               <ProjectCard
                 key={project.id}
@@ -115,6 +121,7 @@ export const LibraryView = ({
                 loadProject={loadProject}
                 exportProject={exportProject}
                 deleteProject={deleteProject}
+                layout={viewMode}
               />
             ))}
           </div>

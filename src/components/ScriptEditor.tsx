@@ -1,14 +1,6 @@
 import React, { useRef } from 'react';
-import { Sparkles, Repeat, Settings, Key, Printer, Copy, FileUp } from 'lucide-react';
+import { Sparkles, Repeat, Settings, Key, Printer, Copy, FileUp, Download } from 'lucide-react';
 import { Project } from '../types';
-
-const GoogleDriveIcon = ({ className = "w-3 h-3" }) => (
-  <img 
-    src="https://upload.wikimedia.org/wikipedia/commons/1/12/Google_Drive_icon_%282020%29.svg" 
-    className={className} 
-    alt="Drive" 
-  />
-);
 
 interface ScriptEditorProps {
   isLoading: boolean;
@@ -295,8 +287,8 @@ export const ScriptEditor = ({
                   }}
                   className="bg-zinc-800 hover:bg-zinc-700 px-2.5 py-1.5 rounded-lg text-[9px] font-bold uppercase tracking-wider transition-all text-zinc-300 border border-zinc-700 active:scale-95 flex items-center gap-1.5"
                 >
-                  <GoogleDriveIcon />
-                  DRIVE
+                  <Download className="w-3 h-3" />
+                  저장
                 </button>
                 <button 
                   onClick={() => saveProject()}

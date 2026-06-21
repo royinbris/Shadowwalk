@@ -308,8 +308,6 @@ export const ApiKeyModal = ({
                       setOpenrouterApiKey('');
                       localStorage.removeItem('user_openrouter_api_key');
                     }
-                    setGoogleClientId('');
-                    localStorage.removeItem('user_google_client_id');
                   }}
                   className="bg-zinc-800 hover:bg-zinc-700 text-zinc-400 py-3 rounded-xl text-xs font-bold transition-all border border-zinc-700 active:scale-95"
                 >
