@@ -876,6 +876,14 @@ export default function App() {
     }
   };
 
+  const handleLocalFileReselect = useCallback((file: File) => {
+    const url = URL.createObjectURL(file);
+    setLocalVideoUrl(url);
+    if (currentProject && file) {
+      setCurrentVideoFile(file);
+    }
+  }, [currentProject]);
+
   const startNewProject = () => {
     setCurrentProject(null);
     setUnifiedInput("");
@@ -3494,6 +3502,7 @@ ${actualQuery}`;
                   localVideoUrl={localVideoUrl}
                   setIsPlaying={setIsPlaying}
                   isFullscreen={isFullscreen}
+                  onLocalFileSelect={handleLocalFileReselect}
                 >
                   <button
                     onClick={(e) => {
