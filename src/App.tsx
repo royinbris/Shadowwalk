@@ -892,15 +892,12 @@ export default function App() {
     const currentVideoUrl = overrideVideoUrl || localVideoUrl;
     const currentVideoFile = overrideVideoFile || localVideoFile;
 
-    // If it's a local video, check if we still have the Blob URL or if it's expired
     if (project.isVideoLocal && !currentVideoUrl) {
       if (currentVideoFile && currentVideoFile.name === project.localFileName) {
         // Reuse current (though localVideoUrl should have been set if file is present)
       } else {
-        setError(
-          `Please re-select the local video file: ${project.localFileName}`,
-        );
-        return;
+        // Allow it to load but without a URL so VideoArea can prompt the user
+        console.warn(`Local video file needed: ${project.localFileName}`);
       }
     }
 

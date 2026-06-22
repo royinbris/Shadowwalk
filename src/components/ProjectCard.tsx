@@ -32,7 +32,9 @@ export const ProjectCard = ({
         onClick={() => loadProject(project)}
       >
         {project.isVideoLocal && (
-          <span className="w-1.5 h-1.5 rounded-full bg-yellow-500 shadow-[0_0_8px_rgba(234,179,8,0.4)] shrink-0" />
+          <span className="inline-block px-1.5 py-0.5 rounded text-[9px] font-bold bg-yellow-500/20 text-yellow-500 border border-yellow-500/30 shrink-0 whitespace-nowrap">
+            🎵 로컬 음원
+          </span>
         )}
         <div className="min-w-0 flex-1 text-sm font-bold text-white truncate">
           {project.title}
@@ -70,12 +72,14 @@ export const ProjectCard = ({
       onClick={() => loadProject(project)}
     >
       <div>
-        <div className="flex items-center justify-between gap-1.5">
-          <div className="min-w-0 flex-1 relative pl-2">
-            {project.isVideoLocal && (
-              <span className="w-1.5 h-1.5 rounded-full bg-yellow-500 shadow-[0_0_8px_rgba(234,179,8,0.4)] absolute left-0 top-1.5 shrink-0" />
-            )}
-            <div className="text-sm font-bold text-white mb-1 leading-tight break-words line-clamp-3">
+        <div className="flex flex-col items-start gap-1.5 mb-1">
+          {project.isVideoLocal && (
+            <span className="inline-block px-1.5 py-0.5 rounded text-[9px] font-bold bg-yellow-500/20 text-yellow-500 border border-yellow-500/30 shrink-0 whitespace-nowrap">
+              🎵 로컬 음원
+            </span>
+          )}
+          <div className="min-w-0 flex-1 relative w-full">
+            <div className="text-sm font-bold text-white leading-tight break-words line-clamp-3">
               {project.title}
             </div>
           </div>
