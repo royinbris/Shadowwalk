@@ -1,8 +1,9 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, forwardRef } from 'react';
 
 interface HoverTranslateTextProps {
   text: string;
   className?: string;
+  style?: React.CSSProperties;
 }
 
 interface DictionaryEntry {
@@ -10,7 +11,7 @@ interface DictionaryEntry {
   terms: string[];
 }
 
-export const HoverTranslateText: React.FC<HoverTranslateTextProps> = ({ text, className }) => {
+export const HoverTranslateText = forwardRef<HTMLParagraphElement, HoverTranslateTextProps>(({ text, className, style }, ref) => {
   const [hoveredWord, setHoveredWord] = useState<string | null>(null);
   const [translation, setTranslation] = useState<string | null>(null);
   const [dictionary, setDictionary] = useState<DictionaryEntry[] | null>(null);
@@ -80,13 +81,18 @@ export const HoverTranslateText: React.FC<HoverTranslateTextProps> = ({ text, cl
 
   return (
     <>
-      <p className={className}>
+      <p className={className} style={style} ref={ref}>
         {words.map((word, i) => (
           <React.Fragment key={i}>
             <span 
               className="hover:text-yellow-300 transition-colors cursor-help inline-block"
               onMouseEnter={(e) => handleMouseEnter(word, e)}
               onMouseLeave={handleMouseLeave}
+              onPointerDown={(e) => e.stopPropagation()}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleMouseEnter(word, e);
+              }}
             >
               {word}
             </span>
@@ -126,4 +132,6 @@ export const HoverTranslateText: React.FC<HoverTranslateTextProps> = ({ text, cl
       )}
     </>
   );
-};
+});
+
+HoverTranslateText.displayName = 'HoverTranslateText';

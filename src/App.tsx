@@ -4808,13 +4808,12 @@ ${actualQuery}`;
                   ref={readerStageRef}
                   className="flex-1 min-h-0 flex items-center justify-center overflow-hidden"
                 >
-                  <p
+                  <HoverTranslateText
                     ref={readerTextRef}
+                    text={transcript[currentIndex]?.text || ""}
                     className="text-white text-center font-bold leading-snug break-words"
                     style={{ fontSize: "60pt" }}
-                  >
-                    {transcript[currentIndex]?.text || ""}
-                  </p>
+                  />
                 </div>
                 {transcript[currentIndex]?.grammar && (
                   <p
