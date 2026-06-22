@@ -16,6 +16,7 @@ interface ScriptEditorProps {
   exportProject: (project: Project) => void;
   saveProject: (silentSave?: boolean, textInput?: string) => Project | null | void;
   error: string | null;
+  handleLocalFileSelection: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
 export const ScriptEditor = ({
@@ -31,7 +32,8 @@ export const ScriptEditor = ({
   currentProject,
   exportProject,
   saveProject,
-  error
+  error,
+  handleLocalFileSelection
 }: ScriptEditorProps) => {
   const [isEnglishOnly, setIsEnglishOnly] = React.useState(false);
   const [storedInput, setStoredInput] = React.useState('');
@@ -85,19 +87,16 @@ export const ScriptEditor = ({
                     자동 수정
                   </button>
                 )}
-                <button 
-                  onClick={() => fileInputRef.current?.click()}
-                  className="bg-emerald-600/20 hover:bg-emerald-600/30 px-2.5 py-1.5 rounded-lg border border-emerald-500/30 text-[9px] font-bold uppercase tracking-wider transition-all text-emerald-400 flex items-center gap-1 active:scale-95 shadow-lg"
-                >
+                <label className="cursor-pointer bg-emerald-600/20 hover:bg-emerald-600/30 px-2.5 py-1.5 rounded-lg border border-emerald-500/30 text-[9px] font-bold uppercase tracking-wider transition-all text-emerald-400 flex items-center gap-1 active:scale-95 shadow-lg">
                   <FileUp size={10} />
-                  SRT 열기
-                </button>
-                <input
-                  type="file"
-                  ref={fileInputRef}
-                  onChange={handleFileUpload}
-                  className="hidden"
-                />
+                  음원+TXT 열기
+                  <input
+                    type="file"
+                    multiple
+                    className="hidden"
+                    onChange={handleLocalFileSelection}
+                  />
+                </label>
                 <button 
                   onClick={() => txtFileInputRef.current?.click()}
                   className="bg-blue-600/20 hover:bg-blue-600/30 px-2.5 py-1.5 rounded-lg border border-blue-500/30 text-[9px] font-bold uppercase tracking-wider transition-all text-blue-400 flex items-center gap-1 active:scale-95 shadow-lg"

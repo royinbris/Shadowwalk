@@ -3356,6 +3356,7 @@ ${actualQuery}`;
                   exportProject={handleExportProject}
                   saveProject={saveProject}
                   error={error}
+                  handleLocalFileSelection={handleLocalFileSelection}
                 />
               </motion.div>
             )}
@@ -4708,6 +4709,7 @@ ${actualQuery}`;
                         exportProject={handleExportProject}
                         saveProject={saveProject}
                         error={error}
+                        handleLocalFileSelection={handleLocalFileSelection}
                       />
                     </div>
                   ) : (
