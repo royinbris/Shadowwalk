@@ -4790,11 +4790,8 @@ ${actualQuery}`;
               className="fixed inset-0 z-[200] bg-black overflow-hidden select-none touch-none cursor-pointer"
             >
               <div
-                className="absolute top-1/2 left-1/2 flex flex-col gap-1"
+                className="absolute top-1/2 left-1/2 flex flex-col gap-1 w-[100vh] h-[100vw] -translate-x-1/2 -translate-y-1/2 rotate-90 md:w-screen md:h-screen md:rotate-0"
                 style={{
-                  width: "100vh",
-                  height: "100vw",
-                  transform: "translate(-50%, -50%) rotate(90deg)",
                   // 로컬 가로축(width=100vh) = 물리 세로축. 좌=상단바, 우=홈인디케이터.
                   paddingLeft: "calc(2.5rem + env(safe-area-inset-top))",
                   paddingRight: "calc(2.5rem + env(safe-area-inset-bottom))",
