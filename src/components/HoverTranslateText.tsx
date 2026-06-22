@@ -1,4 +1,4 @@
-import React, { useState, useRef, forwardRef } from 'react';
+import React, { useState, useRef, forwardRef, useEffect } from 'react';
 
 interface HoverTranslateTextProps {
   text: string;
@@ -25,6 +25,11 @@ export const HoverTranslateText = forwardRef<HTMLParagraphElement, HoverTranslat
     const rect = (e.target as HTMLElement).getBoundingClientRect();
     const cleanWord = word.replace(/[^a-zA-Z0-9'-]/g, '');
     if (!cleanWord) return;
+
+    if (hoveredWord === cleanWord) {
+      handleMouseLeave();
+      return;
+    }
 
     setPosition({ top: rect.top - 10, left: rect.left + rect.width / 2 });
     
@@ -78,6 +83,30 @@ export const HoverTranslateText = forwardRef<HTMLParagraphElement, HoverTranslat
     setDictionary(null);
   };
 
+  useEffect(() => {
+    const handleOutsideClick = (e: PointerEvent) => {
+      handleMouseLeave();
+    };
+    if (hoveredWord) {
+      document.addEventListener('pointerdown', handleOutsideClick);
+    }
+    return () => {
+      document.removeEventListener('pointerdown', handleOutsideClick);
+    };
+  }, [hoveredWord]);
+
+  useEffect(() => {
+    let autoCloseTimer: NodeJS.Timeout;
+    if (hoveredWord) {
+      autoCloseTimer = setTimeout(() => {
+        handleMouseLeave();
+      }, 5000);
+    }
+    return () => {
+      if (autoCloseTimer) clearTimeout(autoCloseTimer);
+    };
+  }, [hoveredWord, translation]); // Also reset timer when translation arrives
+
   const words = text.split(' ');
 
   return (
@@ -104,7 +133,7 @@ export const HoverTranslateText = forwardRef<HTMLParagraphElement, HoverTranslat
 
       {hoveredWord && (
         <div 
-          className={`${popupPosition === 'absolute-top-left' ? 'absolute top-4 left-4' : 'fixed transform -translate-x-1/2 -translate-y-full'} z-[9999] bg-zinc-900/95 backdrop-blur-sm border border-zinc-700/80 text-white px-3 py-2 rounded-lg shadow-2xl text-sm flex flex-col pointer-events-none min-w-[80px]`}
+          className={`${popupPosition === 'absolute-top-left' ? 'absolute top-4 left-4' : 'fixed transform -translate-x-1/2 -translate-y-full'} z-[9999] bg-zinc-900/50 backdrop-blur-md border border-zinc-700/80 text-white px-3 py-2 rounded-lg shadow-2xl text-sm flex flex-col pointer-events-none min-w-[80px]`}
           style={popupPosition === 'absolute-top-left' ? { width: dictionary ? 'max-content' : 'auto', maxWidth: '280px' } : { top: position.top, left: position.left, width: dictionary ? 'max-content' : 'auto', maxWidth: '280px' }}
         >
           {isLoading ? (
