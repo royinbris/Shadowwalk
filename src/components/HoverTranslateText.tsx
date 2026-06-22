@@ -4,6 +4,7 @@ interface HoverTranslateTextProps {
   text: string;
   className?: string;
   style?: React.CSSProperties;
+  popupPosition?: 'normal' | 'absolute-top-left';
 }
 
 interface DictionaryEntry {
@@ -11,7 +12,7 @@ interface DictionaryEntry {
   terms: string[];
 }
 
-export const HoverTranslateText = forwardRef<HTMLParagraphElement, HoverTranslateTextProps>(({ text, className, style }, ref) => {
+export const HoverTranslateText = forwardRef<HTMLParagraphElement, HoverTranslateTextProps>(({ text, className, style, popupPosition = 'normal' }, ref) => {
   const [hoveredWord, setHoveredWord] = useState<string | null>(null);
   const [translation, setTranslation] = useState<string | null>(null);
   const [dictionary, setDictionary] = useState<DictionaryEntry[] | null>(null);
@@ -103,8 +104,8 @@ export const HoverTranslateText = forwardRef<HTMLParagraphElement, HoverTranslat
 
       {hoveredWord && (
         <div 
-          className="fixed z-[9999] bg-zinc-900/95 backdrop-blur-sm border border-zinc-700/80 text-white px-3 py-2 rounded-lg shadow-2xl text-sm flex flex-col pointer-events-none transform -translate-x-1/2 -translate-y-full min-w-[80px]"
-          style={{ top: position.top, left: position.left, width: dictionary ? 'max-content' : 'auto', maxWidth: '280px' }}
+          className={`${popupPosition === 'absolute-top-left' ? 'absolute top-4 left-4' : 'fixed transform -translate-x-1/2 -translate-y-full'} z-[9999] bg-zinc-900/95 backdrop-blur-sm border border-zinc-700/80 text-white px-3 py-2 rounded-lg shadow-2xl text-sm flex flex-col pointer-events-none min-w-[80px]`}
+          style={popupPosition === 'absolute-top-left' ? { width: dictionary ? 'max-content' : 'auto', maxWidth: '280px' } : { top: position.top, left: position.left, width: dictionary ? 'max-content' : 'auto', maxWidth: '280px' }}
         >
           {isLoading ? (
             <div className="flex items-center justify-center min-h-[28px]">

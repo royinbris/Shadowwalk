@@ -4806,13 +4806,14 @@ ${actualQuery}`;
                 )}
                 <div
                   ref={readerStageRef}
-                  className="flex-1 min-h-0 flex items-center justify-center overflow-hidden"
+                  className="flex-1 min-h-0 flex items-center justify-center overflow-hidden relative"
                 >
                   <HoverTranslateText
                     ref={readerTextRef}
                     text={transcript[currentIndex]?.text || ""}
                     className="text-white text-center font-bold leading-snug break-words"
                     style={{ fontSize: "60pt" }}
+                    popupPosition="absolute-top-left"
                   />
                 </div>
                 {transcript[currentIndex]?.grammar && (
