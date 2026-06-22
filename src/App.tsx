@@ -27,6 +27,7 @@ import { ProjectCard } from "./components/ProjectCard";
 import { PromptEditorModal } from "./components/PromptEditorModal";
 import { THEMES } from "./themes";
 import { ApiKeyModal } from "./components/ApiKeyModal";
+import { HoverTranslateText } from "./components/HoverTranslateText";
 import React, { useState, useEffect, useLayoutEffect, useRef, useCallback } from "react";
 import {
   Play,
@@ -4628,11 +4629,10 @@ ${actualQuery}`;
                                 "text-xl md:text-2xl";
 
                               return (
-                                <p
+                                <HoverTranslateText
+                                  text={transcript[currentIndex].text}
                                   className={`${currentClass} font-black leading-tight text-white drop-shadow-[0_4px_12px_rgba(255,255,255,0.2)]`}
-                                >
-                                  {transcript[currentIndex].text}
-                                </p>
+                                />
                               );
                             })()}
 
