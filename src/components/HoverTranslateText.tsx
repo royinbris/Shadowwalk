@@ -5,9 +5,15 @@ interface HoverTranslateTextProps {
   className?: string;
 }
 
+interface DictionaryEntry {
+  pos: string;
+  terms: string[];
+}
+
 export const HoverTranslateText: React.FC<HoverTranslateTextProps> = ({ text, className }) => {
   const [hoveredWord, setHoveredWord] = useState<string | null>(null);
   const [translation, setTranslation] = useState<string | null>(null);
+  const [dictionary, setDictionary] = useState<DictionaryEntry[] | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [position, setPosition] = useState({ top: 0, left: 0 });
   
@@ -26,14 +32,34 @@ export const HoverTranslateText: React.FC<HoverTranslateTextProps> = ({ text, cl
       setHoveredWord(cleanWord);
       setIsLoading(true);
       setTranslation(null);
+      setDictionary(null);
       
       try {
-        const res = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=ko&dt=t&q=${encodeURIComponent(cleanWord)}`);
+        const res = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=ko&dt=t&dt=bd&q=${encodeURIComponent(cleanWord)}`);
         const data = await res.json();
         if (data && data[0] && data[0][0] && data[0][0][0]) {
           setTranslation(data[0][0][0]);
         } else {
           setTranslation('번역 불가');
+        }
+
+        if (data && data[1] && Array.isArray(data[1])) {
+          const dictEntries = data[1].slice(0, 3).map((item: any) => {
+            let posName = item[0];
+            if (posName === 'noun') posName = '명사';
+            else if (posName === 'verb') posName = '동사';
+            else if (posName === 'adjective') posName = '형용사';
+            else if (posName === 'adverb') posName = '부사';
+            else if (posName === 'pronoun') posName = '대명사';
+            else if (posName === 'preposition') posName = '전치사';
+            else if (posName === 'conjunction') posName = '접속사';
+
+            return {
+              pos: posName,
+              terms: Array.isArray(item[1]) ? item[1].slice(0, 5) : []
+            };
+          });
+          setDictionary(dictEntries);
         }
       } catch (err) {
         setTranslation('오류 발생');
@@ -47,6 +73,7 @@ export const HoverTranslateText: React.FC<HoverTranslateTextProps> = ({ text, cl
     if (timerRef.current) clearTimeout(timerRef.current);
     setHoveredWord(null);
     setTranslation(null);
+    setDictionary(null);
   };
 
   const words = text.split(' ');
@@ -70,13 +97,33 @@ export const HoverTranslateText: React.FC<HoverTranslateTextProps> = ({ text, cl
 
       {hoveredWord && (
         <div 
-          className="fixed z-[9999] bg-zinc-900 border border-zinc-700 text-white px-3 py-1.5 rounded-lg shadow-xl text-sm font-bold flex items-center justify-center pointer-events-none transform -translate-x-1/2 -translate-y-full min-w-[60px] min-h-[36px]"
-          style={{ top: position.top, left: position.left }}
+          className="fixed z-[9999] bg-zinc-900/95 backdrop-blur-sm border border-zinc-700/80 text-white px-4 py-3 rounded-xl shadow-2xl text-sm flex flex-col pointer-events-none transform -translate-x-1/2 -translate-y-full min-w-[80px]"
+          style={{ top: position.top, left: position.left, width: dictionary ? 'max-content' : 'auto', maxWidth: '280px' }}
         >
           {isLoading ? (
-            <div className="w-4 h-4 border-2 border-zinc-500 border-t-white rounded-full animate-spin" />
+            <div className="flex items-center justify-center min-h-[36px]">
+              <div className="w-4 h-4 border-2 border-zinc-500 border-t-white rounded-full animate-spin" />
+            </div>
           ) : (
-            <span className="text-emerald-400">{translation}</span>
+            <div className="flex flex-col gap-1.5">
+              <div className="flex items-baseline gap-2">
+                <span className="text-zinc-400 font-medium text-xs">{hoveredWord}</span>
+                <span className="text-emerald-400 font-bold text-base">{translation}</span>
+              </div>
+              
+              {dictionary && dictionary.length > 0 && (
+                <div className="mt-1 flex flex-col gap-2 border-t border-zinc-700/60 pt-2.5">
+                  {dictionary.map((entry, idx) => (
+                    <div key={idx} className="flex flex-col leading-snug">
+                      <span className="text-[10px] text-zinc-500 font-semibold mb-0.5">{entry.pos}</span>
+                      <span className="text-zinc-300 text-[13px] break-keep">
+                        {entry.terms.join(', ')}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           )}
         </div>
       )}

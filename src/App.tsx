@@ -127,6 +127,11 @@ export default function App() {
       );
     }
   }, [currentIndex, currentProject]);
+
+  useEffect(() => {
+    isTransitioningRef.current = false;
+  }, [currentIndex]);
+
   const [showEn, setShowEn] = useState(true);
   const [showKo, setShowKo] = useState(false);
   const [showGrammar, setShowGrammar] = useState(false);
@@ -1486,6 +1491,8 @@ export default function App() {
                 // End of loops or Looping is OFF
                 setLoopCount(0);
 
+                let willChangeIndex = false;
+
                 if (isAutoPause && !isVideoOnly) {
                   // Pause and move to next
                   setIsPlaying(false);
@@ -1499,6 +1506,7 @@ export default function App() {
 
                   if (currentIndex < transcript.length - 1) {
                     const nextIdx = currentIndex + 1;
+                    willChangeIndex = true;
                     setCurrentIndex(nextIdx);
                     if (isSubtitleOnly) {
                       virtualTimeRef.current = transcript[nextIdx].offset;
@@ -1518,6 +1526,7 @@ export default function App() {
                   // Move to next
                   if (currentIndex < transcript.length - 1) {
                     const nextIdx = currentIndex + 1;
+                    willChangeIndex = true;
                     setCurrentIndex(nextIdx);
                     if (isSubtitleOnly) {
                       virtualTimeRef.current = transcript[nextIdx].offset;
@@ -1535,6 +1544,7 @@ export default function App() {
                     }
                   } else if (isContinuous) {
                     // Restart
+                    willChangeIndex = true;
                     setCurrentIndex(0);
                     if (isSubtitleOnly) {
                       virtualTimeRef.current = transcript[0].offset;
@@ -1587,7 +1597,10 @@ export default function App() {
                   playerRef.current.playVideo();
                 }
               }
-              isTransitioningRef.current = false;
+              
+              if (!willChangeIndex) {
+                isTransitioningRef.current = false;
+              }
             };
 
             if (waitTime > 0) {
