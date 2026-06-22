@@ -97,29 +97,26 @@ export const HoverTranslateText: React.FC<HoverTranslateTextProps> = ({ text, cl
 
       {hoveredWord && (
         <div 
-          className="fixed z-[9999] bg-zinc-900/95 backdrop-blur-sm border border-zinc-700/80 text-white px-4 py-3 rounded-xl shadow-2xl text-sm flex flex-col pointer-events-none transform -translate-x-1/2 -translate-y-full min-w-[80px]"
+          className="fixed z-[9999] bg-zinc-900/95 backdrop-blur-sm border border-zinc-700/80 text-white px-3 py-2 rounded-lg shadow-2xl text-sm flex flex-col pointer-events-none transform -translate-x-1/2 -translate-y-full min-w-[80px]"
           style={{ top: position.top, left: position.left, width: dictionary ? 'max-content' : 'auto', maxWidth: '280px' }}
         >
           {isLoading ? (
-            <div className="flex items-center justify-center min-h-[36px]">
+            <div className="flex items-center justify-center min-h-[28px]">
               <div className="w-4 h-4 border-2 border-zinc-500 border-t-white rounded-full animate-spin" />
             </div>
           ) : (
-            <div className="flex flex-col gap-1.5">
+            <div className="flex flex-col gap-1">
               <div className="flex items-baseline gap-2">
                 <span className="text-zinc-400 font-medium text-xs">{hoveredWord}</span>
-                <span className="text-emerald-400 font-bold text-base">{translation}</span>
+                <span className="text-emerald-400 font-bold text-[15px]">{translation}</span>
               </div>
               
               {dictionary && dictionary.length > 0 && (
-                <div className="mt-1 flex flex-col gap-2 border-t border-zinc-700/60 pt-2.5">
+                <div className="mt-0.5 flex flex-col gap-1 border-t border-zinc-700/60 pt-1.5">
                   {dictionary.map((entry, idx) => (
-                    <div key={idx} className="flex flex-col leading-snug">
-                      <span className="text-[10px] text-zinc-500 font-semibold mb-0.5">{entry.pos}</span>
-                      <span className="text-zinc-300 text-[13px] break-keep">
-                        {entry.terms.join(', ')}
-                      </span>
-                    </div>
+                    <span key={idx} className="text-zinc-300 text-xs break-keep leading-snug">
+                      • {entry.terms.join(', ')}
+                    </span>
                   ))}
                 </div>
               )}
