@@ -4792,7 +4792,7 @@ ${actualQuery}`;
               className="fixed inset-0 z-[200] bg-black overflow-hidden select-none touch-none cursor-pointer"
             >
               <div
-                className="absolute top-1/2 left-1/2 flex flex-col gap-1 w-[100vh] h-[100vw] -translate-x-1/2 -translate-y-1/2 rotate-90 md:w-screen md:h-screen md:rotate-0"
+                className="absolute top-1/2 left-1/2 w-[100vh] h-[100vw] -translate-x-1/2 -translate-y-1/2 rotate-90 md:w-screen md:h-screen md:rotate-0"
                 style={{
                   // 로컬 가로축(width=100vh) = 물리 세로축. 좌=상단바, 우=홈인디케이터.
                   paddingLeft: "calc(2.5rem + env(safe-area-inset-top))",
@@ -4813,16 +4813,16 @@ ${actualQuery}`;
                 {/* 폰트 크기 토글 버튼 그룹 */}
                 <div className="absolute top-0 right-0 z-[210] p-6 flex gap-3 opacity-30 hover:opacity-100 transition-opacity">
                   <div
-                    className="cursor-pointer text-white text-sm font-bold border border-white/50 px-2 py-1 rounded"
+                    className="cursor-pointer text-white text-sm font-bold border border-white/50 px-2 py-1 rounded shadow-lg bg-black/30"
                     onPointerDown={(e) => {
                       e.stopPropagation();
                       setLargeEnFontReader(!largeEnFontReader);
                     }}
                   >
-                    영문 {largeEnFontReader ? "60pt" : "100pt"}
+                    영문 {largeEnFontReader ? "60pt" : "120pt"}
                   </div>
                   <div
-                    className="cursor-pointer text-white text-sm font-bold border border-white/50 px-2 py-1 rounded"
+                    className="cursor-pointer text-white text-sm font-bold border border-white/50 px-2 py-1 rounded shadow-lg bg-black/30"
                     onPointerDown={(e) => {
                       e.stopPropagation();
                       setLargeKoFontReader(!largeKoFontReader);
@@ -4832,45 +4832,42 @@ ${actualQuery}`;
                   </div>
                 </div>
 
+                {/* 한글 번역 자막 (상단 고정) */}
                 {transcript[currentIndex]?.translation && (
-                  <p
-                    className="shrink-0 text-center text-white/85 leading-tight break-words relative z-[205]"
-                    style={{ fontSize: largeKoFontReader ? "50pt" : "15pt" }}
-                  >
-                    {transcript[currentIndex]?.translation}
-                  </p>
+                  <div className="absolute top-10 left-0 w-full z-[205] pointer-events-none px-8">
+                    <p
+                      className="text-center text-white/85 leading-tight break-words drop-shadow-2xl"
+                      style={{ fontSize: largeKoFontReader ? "50pt" : "15pt" }}
+                    >
+                      {transcript[currentIndex]?.translation}
+                    </p>
+                  </div>
                 )}
+
+                {/* 영문 자막 (중앙 배치, 레이아웃 제약 없음) */}
                 <div
                   ref={readerStageRef}
-                  className="flex-1 min-h-0 flex items-center justify-center overflow-hidden relative w-full"
+                  className="absolute inset-0 flex items-center justify-center pointer-events-none px-8"
                 >
-                  {(() => {
-                    const text = transcript[currentIndex]?.text || "";
-                    const length = text.length;
-                    let baseSize = largeEnFontReader ? 100 : 60;
-                    // 휴리스틱 스케일 다운: 문장이 길어질수록 폰트를 줄임
-                    if (length > 50) baseSize = baseSize * 0.8;
-                    if (length > 100) baseSize = baseSize * 0.6;
-                    if (length > 150) baseSize = baseSize * 0.4;
-                    
-                    return (
-                      <HoverTranslateText
-                        ref={readerTextRef}
-                        text={text}
-                        className="text-white text-center font-bold leading-snug break-words"
-                        style={{ fontSize: `min(${baseSize}pt, 8vw, 10vh)` }}
-                        popupPosition="absolute-top-left"
-                      />
-                    );
-                  })()}
+                  <HoverTranslateText
+                    ref={readerTextRef}
+                    text={transcript[currentIndex]?.text || ""}
+                    className="text-white text-center font-black leading-snug break-words drop-shadow-[0_10px_30px_rgba(0,0,0,0.8)] pointer-events-auto"
+                    style={{ fontSize: largeEnFontReader ? "120pt" : "60pt" }}
+                    popupPosition="absolute-top-left"
+                  />
                 </div>
+
+                {/* 문법 분석 자막 (하단 고정) */}
                 {transcript[currentIndex]?.grammar && (
-                  <p
-                    className="shrink-0 text-center text-white/60 leading-tight break-words"
-                    style={{ fontSize: "15pt" }}
-                  >
-                    {transcript[currentIndex]?.grammar?.replace(/\s*\n+\s*/g, " · ")}
-                  </p>
+                  <div className="absolute bottom-8 left-0 w-full z-[205] pointer-events-none px-8">
+                    <p
+                      className="text-center text-white/60 leading-tight break-words drop-shadow-2xl"
+                      style={{ fontSize: "15pt" }}
+                    >
+                      {transcript[currentIndex]?.grammar?.replace(/\s*\n+\s*/g, " · ")}
+                    </p>
+                  </div>
                 )}
               </div>
             </div>
