@@ -143,6 +143,7 @@ export default function App() {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showSubtitleReader, setShowSubtitleReader] = useState(false);
   const [largeKoFontReader, setLargeKoFontReader] = useState(false);
+  const [largeEnFontReader, setLargeEnFontReader] = useState(false);
   const [geminiApiKeys, setGeminiApiKeys] = useState<string[]>(() => {
     try {
       const saved = localStorage.getItem("user_gemini_api_keys");
@@ -4809,16 +4810,25 @@ ${actualQuery}`;
                   }}
                 />
                 
-                {/* 한글 글꼴 크기 토글 버튼 */}
-                <div
-                  className="absolute top-0 right-0 z-[210] cursor-pointer opacity-30 hover:opacity-100 transition-opacity p-6"
-                  onPointerDown={(e) => {
-                    e.stopPropagation();
-                    setLargeKoFontReader(!largeKoFontReader);
-                  }}
-                >
-                  <div className="text-white text-sm font-bold border border-white/50 px-2 py-1 rounded">
-                    {largeKoFontReader ? "15pt" : "50pt"}
+                {/* 폰트 크기 토글 버튼 그룹 */}
+                <div className="absolute top-0 right-0 z-[210] p-6 flex gap-3 opacity-30 hover:opacity-100 transition-opacity">
+                  <div
+                    className="cursor-pointer text-white text-sm font-bold border border-white/50 px-2 py-1 rounded"
+                    onPointerDown={(e) => {
+                      e.stopPropagation();
+                      setLargeEnFontReader(!largeEnFontReader);
+                    }}
+                  >
+                    영문 {largeEnFontReader ? "60pt" : "100pt"}
+                  </div>
+                  <div
+                    className="cursor-pointer text-white text-sm font-bold border border-white/50 px-2 py-1 rounded"
+                    onPointerDown={(e) => {
+                      e.stopPropagation();
+                      setLargeKoFontReader(!largeKoFontReader);
+                    }}
+                  >
+                    한글 {largeKoFontReader ? "15pt" : "50pt"}
                   </div>
                 </div>
 
@@ -4832,15 +4842,27 @@ ${actualQuery}`;
                 )}
                 <div
                   ref={readerStageRef}
-                  className="flex-1 min-h-0 flex items-center justify-center overflow-hidden relative"
+                  className="flex-1 min-h-0 flex items-center justify-center overflow-hidden relative w-full"
                 >
-                  <HoverTranslateText
-                    ref={readerTextRef}
-                    text={transcript[currentIndex]?.text || ""}
-                    className="text-white text-center font-bold leading-snug break-words"
-                    style={{ fontSize: "60pt" }}
-                    popupPosition="absolute-top-left"
-                  />
+                  {(() => {
+                    const text = transcript[currentIndex]?.text || "";
+                    const length = text.length;
+                    let baseSize = largeEnFontReader ? 100 : 60;
+                    // 휴리스틱 스케일 다운: 문장이 길어질수록 폰트를 줄임
+                    if (length > 50) baseSize = baseSize * 0.8;
+                    if (length > 100) baseSize = baseSize * 0.6;
+                    if (length > 150) baseSize = baseSize * 0.4;
+                    
+                    return (
+                      <HoverTranslateText
+                        ref={readerTextRef}
+                        text={text}
+                        className="text-white text-center font-bold leading-snug break-words"
+                        style={{ fontSize: `min(${baseSize}pt, 8vw, 10vh)` }}
+                        popupPosition="absolute-top-left"
+                      />
+                    );
+                  })()}
                 </div>
                 {transcript[currentIndex]?.grammar && (
                   <p
