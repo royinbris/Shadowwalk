@@ -142,6 +142,7 @@ export default function App() {
   const [showSyncControls, setShowSyncControls] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showSubtitleReader, setShowSubtitleReader] = useState(false);
+  const [largeKoFontReader, setLargeKoFontReader] = useState(false);
   const [geminiApiKeys, setGeminiApiKeys] = useState<string[]>(() => {
     try {
       const saved = localStorage.getItem("user_gemini_api_keys");
@@ -4799,10 +4800,32 @@ ${actualQuery}`;
                   paddingTop: "0.75rem",
                 }}
               >
+                {/* 닫기 버튼 (보이지 않는 투명 영역) */}
+                <div
+                  className="absolute top-0 left-0 w-32 h-32 z-[210] opacity-0 cursor-pointer"
+                  onPointerDown={(e) => {
+                    e.stopPropagation();
+                    setShowSubtitleReader(false);
+                  }}
+                />
+                
+                {/* 한글 글꼴 크기 토글 버튼 */}
+                <div
+                  className="absolute top-0 right-0 z-[210] cursor-pointer opacity-30 hover:opacity-100 transition-opacity p-6"
+                  onPointerDown={(e) => {
+                    e.stopPropagation();
+                    setLargeKoFontReader(!largeKoFontReader);
+                  }}
+                >
+                  <div className="text-white text-sm font-bold border border-white/50 px-2 py-1 rounded">
+                    {largeKoFontReader ? "15pt" : "50pt"}
+                  </div>
+                </div>
+
                 {transcript[currentIndex]?.translation && (
                   <p
-                    className="shrink-0 text-center text-white/85 leading-tight break-words"
-                    style={{ fontSize: "15pt" }}
+                    className="shrink-0 text-center text-white/85 leading-tight break-words relative z-[205]"
+                    style={{ fontSize: largeKoFontReader ? "50pt" : "15pt" }}
                   >
                     {transcript[currentIndex]?.translation}
                   </p>
