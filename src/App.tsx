@@ -142,8 +142,8 @@ export default function App() {
   const [showSyncControls, setShowSyncControls] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showSubtitleReader, setShowSubtitleReader] = useState(false);
-  const [largeKoFontReader, setLargeKoFontReader] = useState(false);
-  const [largeEnFontReader, setLargeEnFontReader] = useState(false);
+  const [koFontSizeReader, setKoFontSizeReader] = useState<string>("30pt");
+  const [enFontSizeReader, setEnFontSizeReader] = useState<string>("60pt");
   const [geminiApiKeys, setGeminiApiKeys] = useState<string[]>(() => {
     try {
       const saved = localStorage.getItem("user_gemini_api_keys");
@@ -4811,24 +4811,50 @@ ${actualQuery}`;
                 />
                 
                 {/* 폰트 크기 토글 버튼 그룹 */}
-                <div className="absolute top-0 right-0 z-[210] p-6 flex gap-3 opacity-30 hover:opacity-100 transition-opacity">
+                <div className="absolute top-0 right-0 z-[210] p-6 flex gap-3 items-center opacity-30 hover:opacity-100 transition-opacity">
                   <div
-                    className="cursor-pointer text-white text-sm font-bold border border-white/50 px-2 py-1 rounded shadow-lg bg-black/30"
+                    className="relative flex items-center text-white text-sm font-bold border border-white/50 rounded shadow-lg bg-black/30 overflow-hidden"
                     onPointerDown={(e) => {
                       e.stopPropagation();
-                      setLargeEnFontReader(!largeEnFontReader);
                     }}
                   >
-                    영문 {largeEnFontReader ? "60pt" : "120pt"}
+                    <span className="pl-2 pr-1 pointer-events-none select-none text-white/70">한글</span>
+                    <select
+                      value={koFontSizeReader}
+                      onChange={(e) => setKoFontSizeReader(e.target.value)}
+                      className="bg-transparent text-white px-2 py-1 outline-none cursor-pointer pr-4 appearance-none"
+                      style={{ colorScheme: "dark" }}
+                    >
+                      <option value="20pt" className="bg-zinc-900 text-white">20pt</option>
+                      <option value="30pt" className="bg-zinc-900 text-white">30pt</option>
+                      <option value="40pt" className="bg-zinc-900 text-white">40pt</option>
+                      <option value="50pt" className="bg-zinc-900 text-white">50pt</option>
+                      <option value="60pt" className="bg-zinc-900 text-white">60pt</option>
+                    </select>
+                    <div className="absolute right-1 pointer-events-none text-white/50 text-xs">▼</div>
                   </div>
                   <div
-                    className="cursor-pointer text-white text-sm font-bold border border-white/50 px-2 py-1 rounded shadow-lg bg-black/30"
+                    className="relative flex items-center text-white text-sm font-bold border border-white/50 rounded shadow-lg bg-black/30 overflow-hidden"
                     onPointerDown={(e) => {
                       e.stopPropagation();
-                      setLargeKoFontReader(!largeKoFontReader);
                     }}
                   >
-                    한글 {largeKoFontReader ? "15pt" : "50pt"}
+                    <span className="pl-2 pr-1 pointer-events-none select-none text-white/70">영문</span>
+                    <select
+                      value={enFontSizeReader}
+                      onChange={(e) => setEnFontSizeReader(e.target.value)}
+                      className="bg-transparent text-white px-2 py-1 outline-none cursor-pointer pr-4 appearance-none"
+                      style={{ colorScheme: "dark" }}
+                    >
+                      <option value="60pt" className="bg-zinc-900 text-white">60pt</option>
+                      <option value="70pt" className="bg-zinc-900 text-white">70pt</option>
+                      <option value="80pt" className="bg-zinc-900 text-white">80pt</option>
+                      <option value="90pt" className="bg-zinc-900 text-white">90pt</option>
+                      <option value="100pt" className="bg-zinc-900 text-white">100pt</option>
+                      <option value="110pt" className="bg-zinc-900 text-white">110pt</option>
+                      <option value="120pt" className="bg-zinc-900 text-white">120pt</option>
+                    </select>
+                    <div className="absolute right-1 pointer-events-none text-white/50 text-xs">▼</div>
                   </div>
                 </div>
 
@@ -4837,7 +4863,7 @@ ${actualQuery}`;
                   <div className="absolute top-10 left-0 w-full z-[205] pointer-events-none px-8">
                     <p
                       className="text-center text-white/85 leading-tight break-words drop-shadow-2xl"
-                      style={{ fontSize: largeKoFontReader ? "50pt" : "15pt" }}
+                      style={{ fontSize: koFontSizeReader, fontFamily: "'Jua', sans-serif" }}
                     >
                       {transcript[currentIndex]?.translation}
                     </p>
@@ -4853,7 +4879,7 @@ ${actualQuery}`;
                     ref={readerTextRef}
                     text={transcript[currentIndex]?.text || ""}
                     className="text-white text-center font-black leading-snug break-words drop-shadow-[0_10px_30px_rgba(0,0,0,0.8)] pointer-events-auto"
-                    style={{ fontSize: largeEnFontReader ? "120pt" : "60pt" }}
+                    style={{ fontSize: enFontSizeReader }}
                     popupPosition="absolute-top-left"
                   />
                 </div>
@@ -4863,7 +4889,7 @@ ${actualQuery}`;
                   <div className="absolute bottom-8 left-0 w-full z-[205] pointer-events-none px-8">
                     <p
                       className="text-center text-white/60 leading-tight break-words drop-shadow-2xl"
-                      style={{ fontSize: "15pt" }}
+                      style={{ fontSize: "15pt", fontFamily: "'Jua', sans-serif" }}
                     >
                       {transcript[currentIndex]?.grammar?.replace(/\s*\n+\s*/g, " · ")}
                     </p>
