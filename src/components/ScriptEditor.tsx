@@ -117,7 +117,7 @@ export const ScriptEditor = ({
                   ref={txtFileInputRef}
                   onChange={handleFileUpload}
                   className="hidden"
-                  accept=".txt,.srt"
+                  accept=".txt"
                 />
                 <button 
                   onClick={() => setIsEditingPrompt(true)}
