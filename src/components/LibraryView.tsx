@@ -67,6 +67,7 @@ export const LibraryView = ({
                 multiple
                 className="hidden"
                 onChange={handleLocalFileSelection}
+                accept=".mp3,.m4a,.mp4,.txt,.srt,.json,audio/*,video/*"
               />
             </label>
             <button 

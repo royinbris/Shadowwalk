@@ -95,6 +95,7 @@ export const ScriptEditor = ({
                     multiple
                     className="hidden"
                     onChange={handleLocalFileSelection}
+                    accept=".mp3,.m4a,.mp4,.txt,.srt,.json,audio/*,video/*"
                   />
                 </label>
                 <button 
@@ -109,6 +110,7 @@ export const ScriptEditor = ({
                   ref={txtFileInputRef}
                   onChange={handleFileUpload}
                   className="hidden"
+                  accept=".txt,.srt,.json"
                 />
                 <button 
                   onClick={() => setIsEditingPrompt(true)}
