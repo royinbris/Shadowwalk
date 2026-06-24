@@ -761,7 +761,12 @@ export default function App() {
       if (name.endsWith(".mp4") || name.endsWith(".mp3") || name.endsWith(".m4a") || file.type.startsWith("audio/") || file.type.startsWith("video/")) {
         mediaFile = file;
       }
-      if (name.endsWith(".json") || name.endsWith(".txt") || name.endsWith(".srt")) {
+      if (
+        (name.endsWith(".json") || name.endsWith(".txt") || name.endsWith(".srt")) &&
+        !name.endsWith("_0.json") &&
+        !name.endsWith("_0.txt") &&
+        !name.endsWith("_0.srt")
+      ) {
         textFile = file;
       }
     }
