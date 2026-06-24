@@ -41,8 +41,51 @@ export const ScriptEditor = ({
   const txtFileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    let targetFile: File | null = null;
+
+    // 1순위: _0이 붙지 않은 순수 .txt 파일 검색
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      const name = file.name.toLowerCase();
+      if (name.endsWith('.txt') && !name.endsWith('_0.txt')) {
+        targetFile = file;
+        break;
+      }
+    }
+
+    // 2순위: 1순위가 없다면 _0이 붙지 않은 순수 .srt 파일 검색
+    if (!targetFile) {
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        const name = file.name.toLowerCase();
+        if (name.endsWith('.srt') && !name.endsWith('_0.srt')) {
+          targetFile = file;
+          break;
+        }
+      }
+    }
+
+    // 3순위: 1, 2순위가 없다면 _0이 붙지 않은 순수 .json 파일 검색
+    if (!targetFile) {
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        const name = file.name.toLowerCase();
+        if (name.endsWith('.json') && !name.endsWith('_0.json')) {
+          targetFile = file;
+          break;
+        }
+      }
+    }
+
+    // 우선순위에 부합하는 원본 파일이 전혀 찾아지지 않은 경우 (예: _0.txt 만 단독 선택했거나 올바른 원본이 누락된 경우)
+    if (!targetFile) {
+      alert("보안 정책상 임시 파일(_0)이나 특정 파일 단독으로는 원본 '제목.txt' 파일을 자동으로 가져올 수 없습니다.\n\n원본 '제목.txt' 파일을 직접 선택해 주시거나, 다중 선택으로 원본 파일들을 함께 업로드해 주세요.");
+      e.target.value = '';
+      return;
+    }
 
     const reader = new FileReader();
     reader.onload = (event) => {
@@ -53,7 +96,7 @@ export const ScriptEditor = ({
         saveProject(true, newText);
       }
     };
-    reader.readAsText(file);
+    reader.readAsText(targetFile);
     e.target.value = ''; // Reset input so the same file can be selected again
   };
 
@@ -111,6 +154,7 @@ export const ScriptEditor = ({
                   onChange={handleFileUpload}
                   className="hidden"
                   accept=".txt,.srt,.json"
+                  multiple
                 />
                 <button 
                   onClick={() => setIsEditingPrompt(true)}
