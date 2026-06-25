@@ -2196,6 +2196,15 @@ export default function App() {
     };
 
     const handleKeyDown = (e: KeyboardEvent) => {
+      // Shift + Command + G (또는 ㅎ) 단축키로 askGemini() 호출 (타이핑 중이어도 작동)
+      if (e.shiftKey && (e.metaKey || e.ctrlKey) && (e.key.toLowerCase() === "g" || e.key === "ㅎ")) {
+        e.preventDefault();
+        if (!isGeminiLoading) {
+          askGemini();
+        }
+        return;
+      }
+
       // Don't trigger if user is typing in an input or textarea
       const active = document.activeElement;
       const isTyping =
