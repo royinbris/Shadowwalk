@@ -60,7 +60,7 @@
     @apply leading-relaxed whitespace-pre-wrap;
   }
   .markdown-body strong {
-    @apply text-indigo-300 font-bold;
+    @apply text-yellow-400 font-bold;
   }
   .markdown-body ul {
     @apply list-disc list-inside space-y-1 ml-1;
