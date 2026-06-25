@@ -2654,6 +2654,9 @@ export default function App() {
       geminiQuery.trim().toLowerCase() !== "m"
     ) {
       queryToUse = geminiQuery.trim();
+    } else if (!overrideQuery && !geminiQuery.trim()) {
+      // 입력창이 빈 상태에서 호출된 경우, selectedWords가 있더라도 문장 전체 분석으로 가기 위해 queryToUse를 비워둡니다.
+      queryToUse = "";
     } else if (selectedWords.length > 0) {
       queryToUse = selectedWords.join(" ");
     }
@@ -4385,9 +4388,14 @@ ${actualQuery}`;
                               type="text"
                               value={geminiQuery}
                               onChange={(e) => setGeminiQuery(e.target.value)}
-                              onKeyDown={(e) =>
-                                e.key === "Enter" && askGemini()
-                              }
+                              onKeyDown={(e) => {
+                                if (e.key === "Enter") {
+                                  e.preventDefault();
+                                  if (!isGeminiLoading) {
+                                    askGemini();
+                                  }
+                                }
+                              }}
                               placeholder="Gemini에게 질문하기... (Enter: 문장 전체 분석 또는 질문 전송)"
                               className="w-full bg-black border border-zinc-800 rounded-xl pl-4 pr-10 py-2.5 text-base outline-none focus:border-purple-500 transition-colors"
                             />

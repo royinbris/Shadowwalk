@@ -119,7 +119,7 @@ export const AssistantPanel = ({
 
             <button
               onClick={() => askGemini()}
-              disabled={isGeminiLoading || (!geminiQuery.trim() && selectedWords.length === 0)}
+              disabled={isGeminiLoading}
               title="Ask Gemini"
               className="w-[44px] h-[44px] flex-none bg-yellow-500 hover:bg-yellow-400 text-black rounded-xl transition-all active:scale-95 flex items-center justify-center shadow-lg disabled:opacity-50"
             >
