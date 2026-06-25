@@ -102,7 +102,6 @@ export const ScriptEditor = ({
                     multiple
                     className="hidden"
                     onChange={handleLocalFileSelection}
-                    accept=".mp3,.m4a,.mp4,.txt,.srt,.json,audio/*,video/*"
                   />
                 </label>
                 <button 
