@@ -1,9 +1,3 @@
 {
-  "name": "shadowwalk",
-  "rewrites": [
-    {
-      "source": "/api/opencode/:path*",
-      "destination": "https://opencode.ai/zen/v1/:path*"
-    }
-  ]
+  "name": "shadowwalk"
 }

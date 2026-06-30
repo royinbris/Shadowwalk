@@ -92,9 +92,9 @@ export default defineConfig(({mode}) => {
       hmr: process.env.DISABLE_HMR !== 'true',
       proxy: {
         '/api/opencode': {
-          target: 'https://opencode.ai/zen/v1',
+          target: 'https://opencode.ai/zen/v1/chat/completions',
           changeOrigin: true,
-          rewrite: (path) => path.replace(/^\/api\/opencode/, '')
+          rewrite: (path) => ''
         }
       }
     },
