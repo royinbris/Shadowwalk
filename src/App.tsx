@@ -496,7 +496,7 @@ export default function App() {
           throw new Error("⚠️ OpenCode Zen API 키가 설정되지 않았습니다.");
         }
         const response = await fetch(
-          "https://opencode.ai/zen/v1/chat/completions",
+          "/api/opencode/chat/completions",
           {
             method: "POST",
             headers: {
@@ -638,7 +638,7 @@ export default function App() {
           throw new Error("⚠️ OpenCode Zen API 키가 설정되지 않았습니다.");
         }
         const response = await fetch(
-          "https://opencode.ai/zen/v1/chat/completions",
+          "/api/opencode/chat/completions",
           {
             method: "POST",
             headers: {
