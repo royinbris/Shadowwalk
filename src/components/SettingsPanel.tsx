@@ -41,10 +41,10 @@ interface SettingsPanelProps {
   showRecordingPanel: boolean;
   setShowRecordingPanel: (val: boolean) => void;
 
-  aiProvider: 'gemini' | 'cerebras' | 'openrouter';
-  setAiProvider: (val: 'gemini' | 'cerebras' | 'openrouter') => void;
+  aiProvider: 'gemini' | 'cerebras' | 'openrouter' | 'opencode';
+  setAiProvider: (val: 'gemini' | 'cerebras' | 'openrouter' | 'opencode') => void;
   setIsApiKeyModalOpen: (val: boolean) => void;
-  testApiKey: (provider: 'gemini' | 'cerebras' | 'openrouter', key: string) => Promise<boolean>;
+  testApiKey: (provider: 'gemini' | 'cerebras' | 'openrouter' | 'opencode', key: string) => Promise<boolean>;
   userApiKey: string | null;
   cerebrasApiKey: string | null;
   openrouterApiKey: string | null;

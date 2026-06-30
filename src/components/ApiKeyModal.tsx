@@ -5,8 +5,8 @@ import { Sparkles, Eye, EyeOff, X, Plus } from 'lucide-react';
 interface ApiKeyModalProps {
   isOpen: boolean;
   onClose: () => void;
-  aiProvider: 'gemini' | 'cerebras' | 'openrouter';
-  setAiProvider: (provider: 'gemini' | 'cerebras' | 'openrouter') => void;
+  aiProvider: 'gemini' | 'cerebras' | 'openrouter' | 'opencode';
+  setAiProvider: (provider: 'gemini' | 'cerebras' | 'openrouter' | 'opencode') => void;
   geminiApiKeys: string[];
   setGeminiApiKeys: (keys: string[]) => void;
   selectedGeminiKeyIndex: number;
@@ -21,6 +21,10 @@ interface ApiKeyModalProps {
   setOpenrouterApiKey: (key: string) => void;
   openrouterModel: string;
   setOpenrouterModel: (model: string) => void;
+  opencodeApiKey: string;
+  setOpencodeApiKey: (key: string) => void;
+  opencodeModel: string;
+  setOpencodeModel: (model: string) => void;
   isApiKeyVisible: boolean;
   setIsApiKeyVisible: (visible: boolean) => void;
   testApiKey: () => void;
@@ -46,6 +50,10 @@ export const ApiKeyModal = ({
   setOpenrouterApiKey,
   openrouterModel,
   setOpenrouterModel,
+  opencodeApiKey,
+  setOpencodeApiKey,
+  opencodeModel,
+  setOpencodeModel,
   isApiKeyVisible,
   setIsApiKeyVisible,
   testApiKey,
@@ -69,15 +77,15 @@ export const ApiKeyModal = ({
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-black uppercase tracking-tighter text-purple-400 flex items-center gap-2">
-                  <Sparkles className="w-5 h-5" /> {aiProvider === 'gemini' ? 'Gemini' : aiProvider === 'cerebras' ? 'Cerebras' : 'OpenRouter'} API
+                  <Sparkles className="w-5 h-5" /> {aiProvider === 'gemini' ? 'Gemini' : aiProvider === 'cerebras' ? 'Cerebras' : aiProvider === 'openrouter' ? 'OpenRouter' : 'OpenCode Zen'} API
                 </h3>
                 <a 
-                  href={aiProvider === 'gemini' ? "https://aistudio.google.com/app/apikey" : aiProvider === 'cerebras' ? "https://cloud.cerebras.ai/" : "https://openrouter.ai/keys"}
+                  href={aiProvider === 'gemini' ? "https://aistudio.google.com/app/apikey" : aiProvider === 'cerebras' ? "https://cloud.cerebras.ai/" : aiProvider === 'openrouter' ? "https://openrouter.ai/keys" : "https://opencode.ai/zen"}
                   target="_blank" 
                   rel="noopener noreferrer"
                   className="text-[10px] font-bold text-zinc-500 hover:text-purple-400 underline underline-offset-2 transition-colors"
                 >
-                  {aiProvider === 'gemini' ? 'Gemini' : aiProvider === 'cerebras' ? 'Cerebras' : 'OpenRouter'} API 키 발급받기 →
+                  {aiProvider === 'gemini' ? 'Gemini' : aiProvider === 'cerebras' ? 'Cerebras' : aiProvider === 'openrouter' ? 'OpenRouter' : 'OpenCode'} API 키 발급받기 →
                 </a>
               </div>
               <p className="text-[11px] text-zinc-500 leading-relaxed">
@@ -86,28 +94,35 @@ export const ApiKeyModal = ({
             </div>
 
             <div className="space-y-4">
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-1.5 justify-between">
                 <button
                   onClick={() => {
                     setAiProvider('gemini');
                     localStorage.setItem('user_ai_provider', 'gemini');
                   }}
-                  className={`flex-1 py-3 rounded-2xl font-bold transition-all text-[11px] ${aiProvider === 'gemini' ? 'bg-[#00e5ff] text-black' : 'bg-black/40 text-zinc-400 border border-zinc-800'}`}
+                  className={`flex-1 min-w-[70px] py-2 rounded-xl font-bold transition-all text-[10px] ${aiProvider === 'gemini' ? 'bg-[#00e5ff] text-black' : 'bg-black/40 text-zinc-400 border border-zinc-800'}`}
                 >Gemini</button>
                 <button
                   onClick={() => {
                     setAiProvider('cerebras');
                     localStorage.setItem('user_ai_provider', 'cerebras');
                   }}
-                  className={`flex-1 py-3 rounded-2xl font-bold transition-all text-[11px] ${aiProvider === 'cerebras' ? 'bg-[#ff00ff] text-white' : 'bg-black/40 text-zinc-400 border border-zinc-800'}`}
+                  className={`flex-1 min-w-[70px] py-2 rounded-xl font-bold transition-all text-[10px] ${aiProvider === 'cerebras' ? 'bg-[#ff00ff] text-white' : 'bg-black/40 text-zinc-400 border border-zinc-800'}`}
                 >Cerebras</button>
                 <button
                   onClick={() => {
                     setAiProvider('openrouter');
                     localStorage.setItem('user_ai_provider', 'openrouter');
                   }}
-                  className={`flex-1 py-3 rounded-2xl font-bold transition-all text-[11px] ${aiProvider === 'openrouter' ? 'bg-[#00ff88] text-black' : 'bg-black/40 text-zinc-400 border border-zinc-800'}`}
+                  className={`flex-1 min-w-[70px] py-2 rounded-xl font-bold transition-all text-[10px] ${aiProvider === 'openrouter' ? 'bg-[#00ff88] text-black' : 'bg-black/40 text-zinc-400 border border-zinc-800'}`}
                 >OpenRouter</button>
+                <button
+                  onClick={() => {
+                    setAiProvider('opencode');
+                    localStorage.setItem('user_ai_provider', 'opencode');
+                  }}
+                  className={`flex-1 min-w-[70px] py-2 rounded-xl font-bold transition-all text-[10px] ${aiProvider === 'opencode' ? 'bg-yellow-500 text-black' : 'bg-black/40 text-zinc-400 border border-zinc-800'}`}
+                >OpenCode</button>
               </div>
 
               {aiProvider === 'gemini' ? (
@@ -289,6 +304,48 @@ export const ApiKeyModal = ({
                     </div>
                   </div>
                 </>
+              ) : aiProvider === 'opencode' ? (
+                <>
+                  <div className="relative">
+                    <input 
+                      type={isApiKeyVisible ? "text" : "password"}
+                      value={opencodeApiKey}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setOpencodeApiKey(val);
+                        localStorage.setItem('user_opencode_api_key', val);
+                      }}
+                      placeholder="OpenCode Zen API 키를 입력하세요..."
+                      className={`w-full bg-black/40 border rounded-2xl px-5 py-4 text-base text-zinc-200 outline-none transition-all font-mono placeholder:text-zinc-700 ${!opencodeApiKey ? 'border-red-500/50 focus:border-red-500' : 'border-zinc-800 focus:border-yellow-500'}`}
+                    />
+                    <button 
+                      onClick={() => setIsApiKeyVisible(!isApiKeyVisible)}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-600 hover:text-zinc-400 transition-colors"
+                    >
+                      {isApiKeyVisible ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                    </button>
+                  </div>
+                  <div className="relative mt-2">
+                    <select
+                      value={opencodeModel}
+                      onChange={(e) => {
+                        setOpencodeModel(e.target.value);
+                        localStorage.setItem('user_opencode_model', e.target.value);
+                      }}
+                      className="w-full bg-black/40 border border-zinc-800 focus:border-yellow-500 rounded-2xl px-5 py-3 text-sm text-zinc-200 outline-none transition-all font-mono appearance-none"
+                    >
+                      <option value="opencode/deepseek-v4-flash-free">DeepSeek V4 Flash Free (무료)</option>
+                      <option value="opencode/mimo-v2.5-free">MiMo V2.5 Free (무료)</option>
+                      <option value="opencode/nemotron-3-ultra-free">Nemotron 3 Ultra Free (무료)</option>
+                      <option value="opencode/north-mini-code-free">North Mini Code Free (무료)</option>
+                      <option value="opencode/deepseek-v4-flash">DeepSeek V4 Flash</option>
+                      <option value="opencode/deepseek-v4-pro">DeepSeek V4 Pro</option>
+                    </select>
+                    <div className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-600 pointer-events-none">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m6 9 6 6 6-6"/></svg>
+                    </div>
+                  </div>
+                </>
               ) : null}
 
               <div className="grid grid-cols-3 gap-2">
@@ -304,9 +361,12 @@ export const ApiKeyModal = ({
                     } else if (aiProvider === 'cerebras') {
                       setCerebrasApiKey('');
                       localStorage.removeItem('user_cerebras_api_key');
-                    } else {
+                    } else if (aiProvider === 'openrouter') {
                       setOpenrouterApiKey('');
                       localStorage.removeItem('user_openrouter_api_key');
+                    } else if (aiProvider === 'opencode') {
+                      setOpencodeApiKey('');
+                      localStorage.removeItem('user_opencode_api_key');
                     }
                   }}
                   className="bg-zinc-800 hover:bg-zinc-700 text-zinc-400 py-3 rounded-xl text-xs font-bold transition-all border border-zinc-700 active:scale-95"

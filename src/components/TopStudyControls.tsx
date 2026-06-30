@@ -29,7 +29,7 @@ interface TopStudyControlsProps {
   maxLoops: number;
   showVideoControls: boolean;
   setShowVideoControls: (val: boolean) => void;
-  aiProvider: "gemini" | "cerebras" | "openrouter";
+  aiProvider: "gemini" | "cerebras" | "openrouter" | "opencode";
   setTempAnalysisPrompt: (val: string) => void;
   analysisPromptTemplate: string;
   setTempQueryPrompt: (val: string) => void;
@@ -284,7 +284,9 @@ export const TopStudyControls = ({
                   ? "Gemini"
                   : aiProvider === "cerebras"
                     ? "Cerebras"
-                    : "OpenRouter"}{" "}
+                    : aiProvider === "opencode"
+                      ? "OpenCode"
+                      : "OpenRouter"}{" "}
                 도우미
               </h3>
             </div>

@@ -174,14 +174,21 @@ export default function App() {
   const [openrouterModel, setOpenrouterModel] = useState(
     () => localStorage.getItem("user_openrouter_model") || "qwen/qwen-3-235b",
   );
+  const [opencodeApiKey, setOpencodeApiKey] = useState(
+    () => localStorage.getItem("user_opencode_api_key") || "",
+  );
+  const [opencodeModel, setOpencodeModel] = useState(
+    () => localStorage.getItem("user_opencode_model") || "opencode/deepseek-v4-flash-free",
+  );
   const [aiProvider, setAiProvider] = useState<
-    "gemini" | "cerebras" | "openrouter"
+    "gemini" | "cerebras" | "openrouter" | "opencode"
   >(
     () =>
       (localStorage.getItem("user_ai_provider") as
         | "gemini"
         | "cerebras"
-        | "openrouter") || "gemini",
+        | "openrouter"
+        | "opencode") || "gemini",
   );
   const [isApiKeyVisible, setIsApiKeyVisible] = useState(false);
 
@@ -430,7 +437,7 @@ export default function App() {
           }
         }
         return fullText;
-      } else {
+      } else if (aiProvider === "openrouter") {
         const key = openrouterApiKey?.trim();
         if (!key) {
           setIsApiKeyModalOpen(true);
@@ -482,6 +489,58 @@ export default function App() {
           }
         }
         return fullText;
+      } else {
+        const key = opencodeApiKey?.trim();
+        if (!key) {
+          setIsApiKeyModalOpen(true);
+          throw new Error("⚠️ OpenCode Zen API 키가 설정되지 않았습니다.");
+        }
+        const response = await fetch(
+          "https://opencode.ai/zen/v1/chat/completions",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${key}`,
+            },
+            body: JSON.stringify({
+              model: opencodeModel,
+              messages: [{ role: "user", content: prompt }],
+              stream: true,
+            }),
+          },
+        );
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(
+            `OpenCode Zen API Error: ${response.status} ${response.statusText} - ${errorData.error?.message || ""}`,
+          );
+        }
+        const reader = response.body?.getReader();
+        const decoder = new TextDecoder("utf-8");
+        let fullText = "";
+        if (reader) {
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            const chunk = decoder.decode(value, { stream: true });
+            const lines = chunk.split('\n');
+            for (const line of lines) {
+              if (line.startsWith('data: ')) {
+                const dataStr = line.replace('data: ', '').trim();
+                if (dataStr === '[DONE]') continue;
+                try {
+                  const data = JSON.parse(dataStr);
+                  if (data.choices && data.choices[0] && data.choices[0].delta && data.choices[0].delta.content) {
+                    fullText += data.choices[0].delta.content;
+                    onUpdate(fullText);
+                  }
+                } catch (e) {}
+              }
+            }
+          }
+        }
+        return fullText;
       }
     },
     [
@@ -492,6 +551,8 @@ export default function App() {
       cerebrasModel,
       openrouterApiKey,
       openrouterModel,
+      opencodeApiKey,
+      opencodeModel,
       setIsApiKeyModalOpen,
     ],
   );
@@ -542,7 +603,7 @@ export default function App() {
         }
         const data = await response.json();
         return data.choices[0]?.message?.content || "";
-      } else {
+      } else if (aiProvider === "openrouter") {
         const key = openrouterApiKey?.trim();
         if (!key) {
           setIsApiKeyModalOpen(true);
@@ -570,6 +631,34 @@ export default function App() {
         }
         const data = await response.json();
         return data.choices[0]?.message?.content || "";
+      } else {
+        const key = opencodeApiKey?.trim();
+        if (!key) {
+          setIsApiKeyModalOpen(true);
+          throw new Error("⚠️ OpenCode Zen API 키가 설정되지 않았습니다.");
+        }
+        const response = await fetch(
+          "https://opencode.ai/zen/v1/chat/completions",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${key}`,
+            },
+            body: JSON.stringify({
+              model: opencodeModel,
+              messages: [{ role: "user", content: prompt }],
+            }),
+          },
+        );
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(
+            `OpenCode Zen API Error: ${response.status} ${response.statusText} - ${errorData.error?.message || ""}`,
+          );
+        }
+        const data = await response.json();
+        return data.choices[0]?.message?.content || "";
       }
     },
     [
@@ -578,6 +667,8 @@ export default function App() {
       cerebrasApiKey,
       openrouterApiKey,
       openrouterModel,
+      opencodeApiKey,
+      opencodeModel,
       setIsApiKeyModalOpen,
     ],
   );
@@ -2752,7 +2843,9 @@ ${actualQuery}`;
             ? geminiModel
             : aiProvider === "cerebras"
               ? cerebrasModel
-              : openrouterModel;
+              : aiProvider === "opencode"
+                ? opencodeModel
+                : openrouterModel;
         errorMsg = `API 접근 거부 (403). 입력하신 API 키가 "${_currentModel}" 모델을 사용할 권한이 없거나 키가 올바르지 않습니다.`;
       } else if (err.message) {
         errorMsg = `오류: ${err.message}`;
@@ -3602,7 +3695,7 @@ ${actualQuery}`;
                     maxLoops={maxLoops}
                     showVideoControls={showVideoControls}
                     setShowVideoControls={setShowVideoControls}
-                    aiProvider={aiProvider as "gemini" | "cerebras"}
+                    aiProvider={aiProvider}
                     setTempAnalysisPrompt={setTempAnalysisPrompt}
                     analysisPromptTemplate={analysisPromptTemplate}
                     setTempQueryPrompt={setTempQueryPrompt}
@@ -3658,7 +3751,7 @@ ${actualQuery}`;
                   setShowSyncControls={setShowSyncControls}
                   showRecordingPanel={showRecordingPanel}
                   setShowRecordingPanel={setShowRecordingPanel}
-                  aiProvider={aiProvider as "gemini" | "cerebras"}
+                  aiProvider={aiProvider}
                   setAiProvider={setAiProvider as any}
                   setIsApiKeyModalOpen={setIsApiKeyModalOpen}
                   testApiKey={testApiKey as any}
@@ -4634,7 +4727,7 @@ ${actualQuery}`;
                       setShowSyncControls={setShowSyncControls}
                       showRecordingPanel={showRecordingPanel}
                       setShowRecordingPanel={setShowRecordingPanel}
-                      aiProvider={aiProvider as "gemini" | "cerebras"}
+                      aiProvider={aiProvider}
                       setAiProvider={setAiProvider as any}
                       setIsApiKeyModalOpen={setIsApiKeyModalOpen}
                       testApiKey={testApiKey as any}
@@ -4964,6 +5057,10 @@ ${actualQuery}`;
             setOpenrouterApiKey={setOpenrouterApiKey}
             openrouterModel={openrouterModel}
             setOpenrouterModel={setOpenrouterModel}
+            opencodeApiKey={opencodeApiKey}
+            setOpencodeApiKey={setOpencodeApiKey}
+            opencodeModel={opencodeModel}
+            setOpencodeModel={setOpencodeModel}
             isApiKeyVisible={isApiKeyVisible}
             setIsApiKeyVisible={setIsApiKeyVisible}
             testApiKey={testApiKey}

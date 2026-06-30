@@ -135,12 +135,12 @@ export const AssistantPanel = ({
               {isGeminiLoading && (
                 <div className="mt-4 flex items-center space-x-2 text-zinc-500 text-xs">
                   <div className="w-4 h-4 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" />
-                  <span>{aiProvider === 'gemini' ? 'Gemini' : aiProvider === 'cerebras' ? 'Cerebras' : 'OpenRouter'} is thinking...</span>
+                  <span>{aiProvider === 'gemini' ? 'Gemini' : aiProvider === 'cerebras' ? 'Cerebras' : aiProvider === 'opencode' ? 'OpenCode' : 'OpenRouter'} is thinking...</span>
                 </div>
               )}
             </div>
           ) : isGeminiLoading ? (
-            <div className="text-sm text-zinc-500">{aiProvider === 'gemini' ? 'Gemini' : aiProvider === 'cerebras' ? 'Cerebras' : 'OpenRouter'} is thinking...</div>
+            <div className="text-sm text-zinc-500">{aiProvider === 'gemini' ? 'Gemini' : aiProvider === 'cerebras' ? 'Cerebras' : aiProvider === 'opencode' ? 'OpenCode' : 'OpenRouter'} is thinking...</div>
           ) : (
             <div className="text-sm text-zinc-500 leading-relaxed">
               <ul className="list-disc pl-4 space-y-2 mt-2">
