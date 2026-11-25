@@ -14,6 +14,7 @@ import { ScriptLibraryPanel } from "./components/ScriptLibraryPanel";
 import { SettingsPanel } from "./components/SettingsPanel";
 import { ThemeSelector } from "./components/ThemeSelector";
 import { LibraryView } from "./components/LibraryView";
+import { saveCloudProject } from "./cloud";
 import { ScriptEditor } from "./components/ScriptEditor";
 import {
   extractVideoId,
@@ -103,11 +104,13 @@ export default function App() {
   }, [view]);
 
   const [projects, setProjects] = useState<Project[]>([]);
+  const [cloudRefreshKey, setCloudRefreshKey] = useState(0);
   const [isInitializing, setIsInitializing] = useState(true);
   const [currentProject, setCurrentProject] = useState<Project | null>(null);
 
   const [localVideoUrl, setLocalVideoUrl] = useState<string | null>(null);
   const [localVideoFile, setLocalVideoFile] = useState<File | null>(null);
+  const [mediaError, setMediaError] = useState<string | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const [unifiedInput, setUnifiedInput] = useState("");
   const [videoId, setVideoId] = useState<string | null>(null);
@@ -946,6 +949,7 @@ export default function App() {
         };
       }
 
+      setMediaError(null);
       setLocalVideoUrl(url);
       setLocalVideoFile(mediaFile);
 
@@ -976,9 +980,10 @@ export default function App() {
 
   const handleLocalFileReselect = useCallback((file: File) => {
     const url = URL.createObjectURL(file);
+    setMediaError(null);
     setLocalVideoUrl(url);
     if (currentProject && file) {
-      setCurrentVideoFile(file);
+      setLocalVideoFile(file);
     }
   }, [currentProject]);
 
@@ -1181,6 +1186,30 @@ export default function App() {
     }
     
     return updatedProject;
+  };
+
+  const saveToCloud = async (project: Project) => {
+    try {
+      await saveCloudProject(project);
+      setCloudRefreshKey((value) => value + 1);
+      alert('클라우드에 저장했습니다. 다른 기기에서도 불러올 수 있습니다.');
+    } catch (cause) {
+      const message = cause instanceof Error ? cause.message : '클라우드 저장에 실패했습니다.';
+      setError(message);
+      alert(message);
+    }
+  };
+
+  const openCloudText = (content: string) => {
+    setCurrentProject(null);
+    setUnifiedInput(content);
+    setError(null);
+    setView('editor');
+  };
+
+  const openCloudProject = (project: Project) => {
+    saveProjectsToStorage([project, ...projects.filter((item) => item.id !== project.id)]);
+    loadProject(project);
   };
 
   const deleteProject = (id: string) => {
@@ -1590,11 +1619,10 @@ export default function App() {
             }
 
             const performTransition = () => {
+              let willChangeIndex = false;
               if (isLastLoop) {
                 // End of loops or Looping is OFF
                 setLoopCount(0);
-
-                let willChangeIndex = false;
 
                 if (isAutoPause && !isVideoOnly) {
                   // Pause and move to next
@@ -3461,6 +3489,10 @@ ${actualQuery}`;
                 handleLocalFileSelection={handleLocalFileSelection}
                 startNewProject={startNewProject}
                 openEditor={openEditor}
+                cloudRefreshKey={cloudRefreshKey}
+                onOpenCloudText={openCloudText}
+                onOpenCloudProject={openCloudProject}
+                saveToCloud={saveToCloud}
               />
             )}
 
@@ -3486,6 +3518,7 @@ ${actualQuery}`;
                   currentProject={currentProject}
                   exportProject={handleExportProject}
                   saveProject={saveProject}
+                  saveToCloud={saveToCloud}
                   error={error}
                   handleLocalFileSelection={handleLocalFileSelection}
                 />
@@ -3605,6 +3638,19 @@ ${actualQuery}`;
                     </div>
                   </button>
                 )}
+                {mediaError && (
+                  <div className="fixed top-4 left-1/2 -translate-x-1/2 z-[300] max-w-md w-[90vw] bg-red-950/95 border border-red-500/50 text-red-100 text-sm rounded-xl px-4 py-3 shadow-lg backdrop-blur-sm">
+                    <div className="flex items-start gap-3">
+                      <span className="flex-1">{mediaError}</span>
+                      <button
+                        onClick={() => setMediaError(null)}
+                        className="text-red-300 hover:text-white font-bold leading-none"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  </div>
+                )}
                 <VideoArea
                   videoId={videoId}
                   showGeminiHelper={showGeminiHelper}
@@ -3615,6 +3661,7 @@ ${actualQuery}`;
                   setIsPlaying={setIsPlaying}
                   isFullscreen={isFullscreen}
                   onLocalFileSelect={handleLocalFileReselect}
+                  onMediaError={setMediaError}
                 >
                   <button
                     onClick={(e) => {
@@ -4844,6 +4891,7 @@ ${actualQuery}`;
                         currentProject={currentProject}
                         exportProject={handleExportProject}
                         saveProject={saveProject}
+                        saveToCloud={saveToCloud}
                         error={error}
                         handleLocalFileSelection={handleLocalFileSelection}
                       />

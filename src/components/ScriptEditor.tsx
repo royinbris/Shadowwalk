@@ -15,6 +15,7 @@ interface ScriptEditorProps {
   currentProject: Project | null;
   exportProject: (project: Project) => void;
   saveProject: (silentSave?: boolean, textInput?: string) => Project | null | void;
+  saveToCloud: (project: Project) => void;
   error: string | null;
   handleLocalFileSelection: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
@@ -32,6 +33,7 @@ export const ScriptEditor = ({
   currentProject,
   exportProject,
   saveProject,
+  saveToCloud,
   error,
   handleLocalFileSelection
 }: ScriptEditorProps) => {
@@ -298,10 +300,13 @@ export const ScriptEditor = ({
                   저장
                 </button>
                 <button 
-                  onClick={() => saveProject()}
+                  onClick={() => {
+                    const saved = saveProject();
+                    if (saved) saveToCloud(saved);
+                  }}
                   className="bg-yellow-500 hover:bg-yellow-400 px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all text-black shadow-lg shadow-yellow-500/10 active:scale-95"
                 >
-                  Save
+                  클라우드 저장
                 </button>
               </div>
             </div>

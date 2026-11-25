@@ -3,6 +3,7 @@ import { motion } from 'motion/react';
 import { Upload, Plus, Download, FileText, Cloud, LayoutGrid, List } from 'lucide-react';
 import { Project } from '../types';
 import { ProjectCard } from './ProjectCard';
+import { CloudLibrary } from './CloudLibrary';
 
 interface LibraryViewProps {
   projects: Project[];
@@ -14,6 +15,10 @@ interface LibraryViewProps {
   handleLocalFileSelection: (e: React.ChangeEvent<HTMLInputElement>) => void;
   startNewProject: () => void;
   openEditor: () => void;
+  cloudRefreshKey: number;
+  onOpenCloudText: (content: string) => void;
+  onOpenCloudProject: (project: Project) => void;
+  saveToCloud: (project: Project) => void;
 }
 
 export const LibraryView = ({
@@ -25,7 +30,11 @@ export const LibraryView = ({
   handleFileImport,
   handleLocalFileSelection,
   startNewProject,
-  openEditor
+  openEditor,
+  cloudRefreshKey,
+  onOpenCloudText,
+  onOpenCloudProject,
+  saveToCloud
 }: LibraryViewProps) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>(
@@ -96,6 +105,8 @@ export const LibraryView = ({
           </div>
         </div>
 
+        <CloudLibrary refreshKey={cloudRefreshKey} onOpenProject={onOpenCloudProject} onOpenText={onOpenCloudText} />
+
         {projects.length === 0 ? (
           <div className="py-20 text-center space-y-4">
             <div className="w-20 h-20 bg-zinc-900 rounded-full flex items-center justify-center mx-auto">
@@ -121,6 +132,7 @@ export const LibraryView = ({
                 loadProject={loadProject}
                 exportProject={exportProject}
                 deleteProject={deleteProject}
+                saveToCloud={saveToCloud}
                 layout={viewMode}
               />
             ))}

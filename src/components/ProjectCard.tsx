@@ -9,6 +9,7 @@ interface ProjectCardProps {
   exportProject: (project: Project) => void;
   deleteProject: (id: string) => void;
   layout?: 'grid' | 'list';
+  saveToCloud?: (project: Project) => void;
 }
 
 export const ProjectCard = ({
@@ -17,7 +18,8 @@ export const ProjectCard = ({
   loadProject,
   exportProject,
   deleteProject,
-  layout = 'grid'
+  layout = 'grid',
+  saveToCloud
 }: ProjectCardProps) => {
   const isActive = currentProject?.id === project.id;
 
@@ -43,6 +45,7 @@ export const ProjectCard = ({
           {new Date(project.createdAt).toLocaleDateString()}
         </span>
         <div className="flex items-center gap-1 shrink-0">
+          {saveToCloud && <button onClick={(e) => { e.stopPropagation(); saveToCloud(project); }} title="클라우드에 저장" className="text-[9px] text-sky-300 px-1">☁ 저장</button>}
           <button
             onClick={(e) => { e.stopPropagation(); exportProject(project); }}
             className="flex items-center gap-1 px-1.5 py-0.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 rounded transition-all border border-zinc-700 text-[8px] uppercase font-bold shrink-0"
@@ -97,6 +100,7 @@ export const ProjectCard = ({
         </div>
         
         <div className="flex items-center gap-1 shrink-0">
+          {saveToCloud && <button onClick={(e) => { e.stopPropagation(); saveToCloud(project); }} title="클라우드에 저장" className="text-[9px] text-sky-300 px-1">☁ 저장</button>}
           <button
             onClick={(e) => { e.stopPropagation(); exportProject(project); }}
             className="flex items-center gap-1 px-1.5 py-0.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 rounded transition-all border border-zinc-700 text-[8px] uppercase font-bold shrink-0"

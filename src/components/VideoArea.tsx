@@ -12,7 +12,15 @@ interface VideoAreaProps {
   isFullscreen?: boolean;
   children?: React.ReactNode;
   onLocalFileSelect?: (file: File) => void;
+  onMediaError?: (message: string) => void;
 }
+
+const MEDIA_ERROR_MESSAGES: Record<number, string> = {
+  1: "재생이 중단되었습니다.",
+  2: "파일을 읽는 중 네트워크 오류가 발생했습니다.",
+  3: "파일을 디코딩할 수 없습니다. 브라우저가 지원하지 않는 코덱입니다.",
+  4: "브라우저가 지원하지 않는 형식입니다. 확장자는 m4a/mp4여도 내부가 무압축 PCM·ALAC이면 재생되지 않습니다. AAC로 변환해 주세요.",
+};
 
 export const VideoArea = ({
   videoId,
@@ -24,7 +32,8 @@ export const VideoArea = ({
   setIsPlaying,
   isFullscreen,
   children,
-  onLocalFileSelect
+  onLocalFileSelect,
+  onMediaError
 }: VideoAreaProps) => {
   return (
     <div 
@@ -44,6 +53,13 @@ export const VideoArea = ({
               onPlay={() => setIsPlaying(true)}
               onPause={() => setIsPlaying(false)}
               onEnded={() => setIsPlaying(false)}
+              onError={(e) => {
+                const code = (e.currentTarget as HTMLVideoElement).error?.code;
+                setIsPlaying(false);
+                onMediaError?.(
+                  (code && MEDIA_ERROR_MESSAGES[code]) || "미디어 파일을 재생할 수 없습니다.",
+                );
+              }}
               playsInline
             />
             {!localVideoUrl && (
